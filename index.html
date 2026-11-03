@@ -54,6 +54,67 @@
         .milestone-banner {
             animation: milestone-pop 3.2s forwards ease-in-out;
         }
+
+        .hidden { display: none !important; }
+
+        /* ===== 시작 메뉴 ===== */
+        #startScreen { position: absolute; inset: 0; z-index: 20; overflow: hidden; pointer-events: auto; background: #38bdf8; }
+        #menuCanvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+        .menu-title { position: absolute; left: 5%; top: 6%; pointer-events: none; }
+        .title-sky { font-family: 'Jua','Nunito',sans-serif; font-size: clamp(2.4rem, min(10vh, 14vw), 5.4rem); line-height: 1; color: #fff; letter-spacing: .06em;
+            text-shadow: -3px 0 0 #0c4a6e, 3px 0 0 #0c4a6e, 0 -3px 0 #0c4a6e, 0 4px 0 #0369a1, 0 8px 0 #075985, 0 14px 22px rgba(2,6,23,.35);
+            animation: titleBob 3.2s ease-in-out infinite; }
+        .title-diver { font-family: 'Jua','Nunito',sans-serif; font-size: clamp(3.2rem, min(15vh, 21vw), 7.8rem); line-height: .95; color: #fde047; margin-left: 1.1em;
+            text-shadow: -3px 0 0 #7c2d12, 3px 0 0 #7c2d12, 0 -3px 0 #7c2d12, 0 5px 0 #ea580c, 0 10px 0 #9a3412, 0 16px 26px rgba(2,6,23,.4);
+            animation: titleBob 3.2s ease-in-out .5s infinite; }
+        .title-tag { margin: .6em 0 0 .4em; font-weight: 900; font-size: clamp(.8rem, 2.4vh, 1.1rem); color: #fff; text-shadow: 0 2px 4px rgba(2,6,23,.55); }
+        @keyframes titleBob { 0%,100% { transform: translateY(0) rotate(-1.5deg); } 50% { transform: translateY(-7px) rotate(1deg); } }
+
+        .menu-buttons { position: absolute; display: flex; flex-direction: column; gap: 1.7vh; left: 5%; top: 43%; width: 30%; min-width: 250px; max-width: 360px; }
+        .menu-btn { position: relative; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .15rem;
+            padding: 1.5vh 1rem; border-radius: 1.1rem; font-family: 'Jua','Nunito',sans-serif; font-weight: 900; font-size: clamp(1rem, 3.4vh, 1.5rem); line-height: 1.1; color: #fff;
+            border: 3px solid rgba(255,255,255,.88); box-shadow: 0 6px 0 rgba(0,0,0,.22), 0 12px 24px rgba(2,6,23,.25);
+            transition: transform .12s, filter .12s, box-shadow .12s; cursor: pointer; text-shadow: 0 2px 0 rgba(0,0,0,.25); }
+        .menu-btn small { font-size: .6em; font-weight: 800; opacity: .95; text-shadow: none; }
+        .menu-btn:hover { transform: translateY(-2px) scale(1.02); filter: brightness(1.08); }
+        .menu-btn:active { transform: translateY(3px) scale(.98); box-shadow: 0 2px 0 rgba(0,0,0,.22); }
+        .menu-btn-normal { background: linear-gradient(135deg, #38bdf8, #2563eb); }
+        .menu-btn-hard { background: linear-gradient(135deg, #ef4444, #9f1239); }
+        .menu-btn-boss { background: linear-gradient(135deg, #3f3f46, #450a0a); border-color: #fca5a5; margin-top: .6vh; }
+        .menu-btn-boss .flame { position: absolute; top: -.95em; font-size: 1.35em; animation: flicker .55s infinite alternate; text-shadow: none; pointer-events: none; }
+        @keyframes flicker { from { transform: translateY(0) scale(1) rotate(-7deg); opacity: .85; } to { transform: translateY(-4px) scale(1.22) rotate(7deg); opacity: 1; } }
+        .ribbon { position: absolute; right: -.5rem; top: -.8rem; background: #facc15; color: #7c2d12; font-size: .55em; padding: .18rem .6rem; border-radius: .6rem; transform: rotate(6deg);
+            box-shadow: 0 3px 0 rgba(0,0,0,.25); text-shadow: none; border: 2px solid #fff; font-weight: 900; }
+        .menu-status { text-align: center; font-size: .75rem; font-weight: 800; color: #fff; text-shadow: 0 1px 3px rgba(2,6,23,.6); margin: 0; }
+
+        .shop-btn { position: absolute; right: 7%; bottom: 9%; display: flex; flex-direction: column; align-items: center; gap: .3rem; cursor: pointer; background: none; border: 0; animation: shopBounce 2.4s ease-in-out infinite; }
+        .shop-icon { width: clamp(3.6rem, 12vh, 5.6rem); height: clamp(3.6rem, 12vh, 5.6rem); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: clamp(2rem, 7vh, 3.2rem);
+            background: radial-gradient(circle at 30% 25%, #fef08a, #f59e0b); border: 3px solid #fff; box-shadow: 0 6px 0 rgba(0,0,0,.2), 0 12px 22px rgba(2,6,23,.28); }
+        .shop-label { font-family: 'Jua','Nunito',sans-serif; font-weight: 900; font-size: clamp(.95rem, 2.8vh, 1.25rem); color: #fff; background: rgba(15,23,42,.65); padding: .1rem .8rem; border-radius: 999px; }
+        @keyframes shopBounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
+        .shop-btn:active { transform: scale(.94); }
+
+        .help-btn { position: absolute; left: 5%; bottom: 4%; font-family: 'Jua','Nunito',sans-serif; font-weight: 900; font-size: .95rem; color: #0c4a6e; background: rgba(255,255,255,.8);
+            border: 2px solid #fff; padding: .35rem .9rem; border-radius: 999px; cursor: pointer; box-shadow: 0 4px 10px rgba(2,6,23,.2); }
+        .help-panel { position: absolute; inset: 0; z-index: 30; display: none; align-items: center; justify-content: center; background: rgba(0,0,0,.5); padding: 16px; }
+        .help-panel.show { display: flex; }
+        .help-card { background: rgba(255,255,255,.95); border-radius: 1.5rem; padding: 1.2rem 1.4rem; max-width: 24rem; width: 100%; color: #0c4a6e; font-size: .85rem; line-height: 1.55; font-weight: 700; box-shadow: 0 20px 50px rgba(0,0,0,.35); }
+        .help-card h3 { margin: 0 0 .5rem; text-align: center; font-size: 1.1rem; color: #b45309; font-family: 'Jua','Nunito',sans-serif; }
+        .help-card p { margin: .2rem 0; }
+        .menu-toast { position: absolute; left: 50%; bottom: 14%; transform: translateX(-50%); z-index: 40; padding: .6rem 1.2rem; border-radius: 999px; background: rgba(15,23,42,.82); color: #fff;
+            font-weight: 800; font-size: .9rem; white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity .3s; }
+
+        @media (max-height: 460px) and (min-aspect-ratio: 21/20) {
+            .help-btn { left: auto; right: 16px; top: 16px; bottom: auto; }
+        }
+        @media (max-aspect-ratio: 21/20) {
+            .menu-title { left: 20px; top: 20px; }
+            .menu-buttons { left: 24px; right: 24px; top: auto; bottom: 24px; width: auto; min-width: 0; max-width: 420px; margin: 0 auto; gap: 1.3vh; }
+            .shop-btn { right: 16px; top: 16px; bottom: auto; }
+            .help-btn { left: 20px; right: auto; top: 205px; bottom: auto; }
+            .title-diver { margin-left: .5em; font-size: clamp(3rem, min(13vh, 18vw), 7rem); }
+            .shop-icon { width: 3.4rem; height: 3.4rem; font-size: 1.9rem; }
+        }
     </style>
 </head>
 <body class="w-screen h-screen flex justify-center items-center relative overflow-hidden select-none">
@@ -118,42 +179,53 @@
         </button>
     </div>
 
-    <!-- 시작 화면 모달 -->
-    <div id="startScreen" class="absolute inset-0 flex items-center justify-center bg-sky-950/40 backdrop-blur-sm z-20 pointer-events-auto p-4">
-        <div class="glass-panel w-full max-w-sm rounded-3xl p-6 sm:p-8 text-center text-slate-900 flex flex-col items-center gap-5 shadow-2xl border border-white/60">
-            <div class="relative">
-                <div class="text-6xl my-1 animate-bounce">🪂</div>
-                <h1 class="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-sky-700 to-indigo-900 drop-shadow">
-                    스카이 다이버
-                </h1>
-                <p class="text-sm text-sky-900 font-bold mt-1">대기권을 돌파하며 장애물을 피하세요!</p>
-            </div>
+    <!-- 시작 화면 -->
+    <div id="startScreen">
+        <canvas id="menuCanvas"></canvas>
 
-            <!-- 조작 가이드 -->
-            <div class="bg-white/40 rounded-2xl p-3.5 w-full text-xs text-sky-950 space-y-1.5 text-left border border-white/40 font-medium">
-                <p class="font-bold text-amber-700 text-center mb-1 text-sm">🎮 조작 및 아이템 안내</p>
+        <div class="menu-title">
+            <div class="title-sky">Sky</div>
+            <div class="title-diver">Diver</div>
+            <div class="title-tag">🪂 대기권을 돌파하라!</div>
+        </div>
+
+        <div class="menu-buttons">
+            <button id="startNormalBtn" class="menu-btn menu-btn-normal">
+                <span>☁️ 일반 모드</span>
+                <small>푸른 하늘 · 아이템 보통</small>
+            </button>
+            <button id="startHardBtn" class="menu-btn menu-btn-hard animate-pulse-btn">
+                <span>🦉 하드 모드</span>
+                <small>붉은 부엉이 하늘 · 아이템 적음</small>
+            </button>
+            <button id="bossBtn" class="menu-btn menu-btn-boss">
+                <span class="flame" style="left:5%">🔥</span><span class="flame" style="left:47%;animation-delay:.18s">🔥</span><span class="flame" style="right:5%;animation-delay:.36s">🔥</span>
+                <span>보스전</span>
+                <small>⚔️ 강력한 보스에 도전!</small>
+                <span class="ribbon">아직 출시 전</span>
+            </button>
+            <p id="bgmStatus" class="menu-status">🎵 음악 불러오는 중…</p>
+        </div>
+
+        <button id="shopBtn" class="shop-btn"><span class="shop-icon">🏪</span><span class="shop-label">상점</span></button>
+        <button id="helpBtn" class="help-btn">❓ 도움말</button>
+
+        <div id="helpPanel" class="help-panel">
+            <div class="help-card">
+                <h3>🎮 조작 및 아이템 안내</h3>
                 <p>• <b>조작:</b> 마우스/터치 드래그 또는 방향키(←, →)</p>
                 <p>• 🧊 <b>두부:</b> 미소 짓는 두부 +100m 보너스 거리</p>
                 <p>• 🚀 <b>로켓:</b> 충돌 시 52.3m 피격 후퇴 (변신 시 무효)</p>
-                <p>• 🐨 <b>코알라:</b> 1회용 영구 보호막 (정장 코알라 변신)</p>
-                <p>• 🪶 <b>중력:</b> 낙하 속도를 완화해주는 중력 아이템</p>
-                <p>• 👵 <b>할가스:</b> 희귀 슈퍼 모드 (일반 2% / 하드 1%) · 3.25배 가속 & 무적</p>
-                <p class="font-bold text-rose-700">• 🦉 <b>하드 모드:</b> 붉은 부엉이 하늘, 아이템이 훨씬 적게 나와요</p>
-                <p class="text-indigo-900 font-bold mt-1">• 🎵 모드를 선택하면 <b>배경음악이 자동으로 재생</b>됩니다!</p>
+                <p>• 🐨 <b>코알라:</b> 1회용 보호막 (정장 코알라 변신)</p>
+                <p>• 🪶 <b>중력:</b> 낙하 속도를 완화해주는 아이템</p>
+                <p>• 👵 <b>할가스:</b> 희귀 슈퍼 모드 (일반 2% / 하드 1%) · 3.25배 가속 &amp; 무적</p>
+                <p style="color:#be123c">• 🦉 <b>하드 모드:</b> 붉은 부엉이 하늘, 아이템이 훨씬 적게 나와요</p>
+                <p style="color:#4338ca">• 🎵 모드를 선택하면 <b>배경음악이 자동으로 재생</b>됩니다!</p>
+                <p style="text-align:center;margin-top:.7rem;opacity:.7">(아무 곳이나 누르면 닫혀요)</p>
             </div>
-
-            <div class="w-full flex flex-col gap-3">
-                <button id="startNormalBtn" class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-sky-400 to-blue-600 hover:from-sky-300 hover:to-blue-500 text-white font-black text-lg shadow-xl active:scale-95 transition-all cursor-pointer flex flex-col items-center leading-tight">
-                    <span>☁️ 일반 모드 시작하기</span>
-                    <span class="text-xs font-bold opacity-90">푸른 하늘 · 아이템 보통</span>
-                </button>
-                <button id="startHardBtn" class="animate-pulse-btn w-full py-3.5 rounded-2xl bg-gradient-to-r from-red-600 to-rose-800 hover:from-red-500 hover:to-rose-700 text-white font-black text-lg shadow-xl active:scale-95 transition-all cursor-pointer flex flex-col items-center leading-tight">
-                    <span>🦉 하드 모드 시작하기</span>
-                    <span class="text-xs font-bold opacity-90">붉은 부엉이 하늘 · 아이템 적음</span>
-                </button>
-            </div>
-            <p id="bgmStatus" class="text-xs font-bold text-sky-900">🎵 음악 불러오는 중…</p>
         </div>
+
+        <div id="menuToast" class="menu-toast"></div>
     </div>
 
     <!-- 게임 오버 모달 -->
@@ -1160,7 +1232,268 @@
         window.addEventListener('pointermove',(e)=>{if(gameState===STATE.PLAYING&&player.hitRocketTimer<=0)targetX=e.clientX;});
         window.addEventListener('touchmove',(e)=>{if(gameState===STATE.PLAYING&&e.touches.length>0&&player.hitRocketTimer<=0)targetX=e.touches[0].clientX;},{passive:true});
 
-        window.onload=function(){sounds.loadBGM();gameLoop();};
+        // ===================== 시작 메뉴 (애니메이션) =====================
+        const menuEl = document.getElementById('startScreen');
+        const mc = document.getElementById('menuCanvas');
+        const mctx = mc.getContext('2d');
+        let menuRunning = false, menuLast = 0, menuT = 0, menuW = 0, menuH = 0, menuDpr = 1;
+        let menuClouds = [], menuBirds = [], menuSparks = [], menuTofus = [], menuStreaks = [];
+
+        function menuResize() {
+            menuDpr = Math.min(2, window.devicePixelRatio || 1);
+            menuW = window.innerWidth; menuH = window.innerHeight;
+            mc.width = Math.round(menuW * menuDpr); mc.height = Math.round(menuH * menuDpr);
+            mctx.setTransform(menuDpr, 0, 0, menuDpr, 0, 0);
+            menuInit();
+        }
+
+        function menuInit() {
+            const m = Math.min(menuW, menuH);
+            menuClouds = Array.from({ length: 18 }, (_, i) => {
+                const layer = i % 3;
+                return { layer, x: Math.random() * (menuW + 400) - 200, y: Math.random() * menuH * 0.9,
+                    size: [0.045, 0.07, 0.1][layer] * m * (0.8 + Math.random() * 0.5),
+                    speed: [7, 16, 30][layer] * (0.7 + Math.random() * 0.6), alpha: [0.4, 0.6, 0.85][layer], bob: Math.random() * 6 };
+            }).sort((a, b) => a.layer - b.layer);
+            menuBirds = Array.from({ length: 4 }, () => ({ x: Math.random() * menuW, y: menuH * (0.1 + Math.random() * 0.5), speed: 30 + Math.random() * 30, s: m * (0.014 + Math.random() * 0.008), ph: Math.random() * 6 }));
+            menuSparks = Array.from({ length: 28 }, () => ({ x: Math.random() * menuW, y: Math.random() * menuH, r: 1.5 + Math.random() * 3, ph: Math.random() * 6, sp: 1 + Math.random() * 2 }));
+            menuTofus = Array.from({ length: 4 }, () => ({ x: Math.random() * menuW, y: menuH * (0.2 + Math.random() * 0.8), s: m * 0.0017 * (0.8 + Math.random() * 0.5), sp: 14 + Math.random() * 16, ph: Math.random() * 6 }));
+            menuStreaks = Array.from({ length: 18 }, () => ({ x: Math.random() * menuW * 1.5, y: Math.random() * menuH, len: m * (0.12 + Math.random() * 0.2), sp: 260 + Math.random() * 320, a: 0.12 + Math.random() * 0.2 }));
+        }
+
+        function menuCloud(c, x, y, s, a) {
+            c.save(); c.globalAlpha = a; c.fillStyle = '#ffffff';
+            c.beginPath();
+            c.arc(x, y, s, 0, Math.PI * 2);
+            c.arc(x + s * 0.9, y + s * 0.15, s * 0.75, 0, Math.PI * 2);
+            c.arc(x - s * 0.9, y + s * 0.2, s * 0.7, 0, Math.PI * 2);
+            c.arc(x + s * 0.3, y - s * 0.55, s * 0.65, 0, Math.PI * 2);
+            c.fill(); c.restore();
+        }
+
+        function menuBird(c, x, y, s, t) {
+            const f = Math.sin(t * 8) * 0.7;
+            c.save(); c.translate(x, y); c.strokeStyle = 'rgba(15,23,42,0.55)'; c.lineWidth = Math.max(1.5, s * 0.2); c.lineCap = 'round';
+            c.beginPath(); c.moveTo(-s, -f * s); c.quadraticCurveTo(-s * 0.5, s * 0.15, 0, 0); c.quadraticCurveTo(s * 0.5, s * 0.15, s, -f * s); c.stroke();
+            c.restore();
+        }
+
+        function menuTofu(c, t) {
+            const z = 22;
+            c.save(); c.shadowColor = '#60a5fa'; c.shadowBlur = 12; c.fillStyle = '#ffffff';
+            c.beginPath(); c.roundRect(-z, -z, z * 2, z * 2, 8); c.fill();
+            c.shadowBlur = 0; c.strokeStyle = '#93c5fd'; c.lineWidth = 2.5; c.stroke();
+            c.fillStyle = '#eff6ff'; c.beginPath(); c.roundRect(-z + 3, -z + 3, z * 2 - 6, z * 2 - 6, 6); c.fill();
+            c.fillStyle = '#1e293b'; c.beginPath(); c.arc(-7, -3, 2.5, 0, Math.PI * 2); c.arc(7, -3, 2.5, 0, Math.PI * 2); c.fill();
+            c.strokeStyle = '#1e293b'; c.lineWidth = 2; c.beginPath(); c.arc(0, 2, 6, 0.1, Math.PI - 0.1); c.stroke();
+            c.fillStyle = '#fda4af'; c.beginPath(); c.arc(-11, 2, 3, 0, Math.PI * 2); c.arc(11, 2, 3, 0, Math.PI * 2); c.fill();
+            c.restore();
+        }
+
+        // 큰 스카이다이버 (불꽃 꼬리, 팔다리·표정 애니메이션)
+        function drawMenuDiver(c, t, trail = 1) {
+            c.save(); c.lineCap = 'round'; c.lineJoin = 'round';
+            // 대기권 돌파 불꽃: 머리 앞쪽에서 타오르며 몸 양옆을 따라 뒤로 길게 흐른다
+            c.save();
+            const hg = c.createRadialGradient(0, -42, 4, 0, -42, 54);
+            hg.addColorStop(0, 'rgba(255,250,220,0.95)'); hg.addColorStop(0.35, 'rgba(253,186,116,0.7)'); hg.addColorStop(1, 'rgba(239,68,68,0)');
+            c.fillStyle = hg; c.beginPath(); c.arc(0, -42, 54, 0, Math.PI * 2); c.fill();
+            c.shadowColor = '#ef4444'; c.shadowBlur = 22;
+            const layers = [['rgba(220,38,38,0.9)', 1, 1.0], ['rgba(249,115,22,0.9)', 0.78, 0.8], ['rgba(250,204,21,0.9)', 0.5, 0.55]];
+            for (const [col, wk, lk] of layers) {
+                for (let i = 0; i < 9; i++) {
+                    const bx = (i - 4) * 8.5, by = -36 + Math.abs(bx) * 0.35;
+                    const len = (110 + (i % 3) * 30 + Math.sin(t * 9 + i * 1.9) * 18) * trail * lk;
+                    const sway = Math.sin(t * 6 + i * 1.3) * 5 + bx * 0.5;
+                    const w = (10 - Math.abs(i - 4) * 0.8) * wk;
+                    const g = c.createLinearGradient(0, by, 0, by + len);
+                    g.addColorStop(0, col); g.addColorStop(1, 'rgba(250,204,21,0)');
+                    c.fillStyle = g;
+                    c.beginPath(); c.moveTo(bx - w, by);
+                    c.quadraticCurveTo(bx - w * 0.4 + sway * 0.5, by + len * 0.5, bx + sway, by + len);
+                    c.quadraticCurveTo(bx + w * 0.4 + sway * 0.5, by + len * 0.5, bx + w, by);
+                    c.closePath(); c.fill();
+                }
+            }
+            c.restore();
+            // 앞쪽 충격파 (대기 마찰)
+            c.save(); c.lineCap = 'round';
+            c.strokeStyle = 'rgba(255,237,213,0.9)'; c.lineWidth = 4; c.shadowColor = '#fb923c'; c.shadowBlur = 16;
+            c.beginPath(); c.arc(0, -8, 46 + Math.sin(t * 8) * 2, Math.PI * 1.12, Math.PI * 1.88); c.stroke();
+            c.strokeStyle = 'rgba(251,146,60,0.8)'; c.lineWidth = 3;
+            c.beginPath(); c.arc(0, -8, 55 + Math.sin(t * 8 + 1) * 2, Math.PI * 1.18, Math.PI * 1.82); c.stroke();
+            c.restore();
+            // 흩날리는 불씨
+            c.save();
+            for (let i = 0; i < 16; i++) {
+                const yy = ((t * 95 + i * 41) % 170) - 20, xx = ((i % 5) - 2) * 15 + Math.sin(t * 5 + i) * 7;
+                c.globalAlpha = Math.max(0, 1 - yy / 170); c.fillStyle = yy < 60 ? '#fde047' : '#f97316';
+                c.beginPath(); c.arc(xx, yy, 1.6 + (i % 3) * 0.8, 0, Math.PI * 2); c.fill();
+            }
+            c.restore();
+            // 다리
+            const kick = Math.sin(t * 7) * 5;
+            c.strokeStyle = '#1d4ed8'; c.lineWidth = 8;
+            c.beginPath(); c.moveTo(-6, 26); c.lineTo(-10 - kick * 0.4, 42 + kick); c.moveTo(6, 26); c.lineTo(10 + kick * 0.4, 42 - kick); c.stroke();
+            c.fillStyle = '#ef4444'; c.beginPath(); c.arc(-10 - kick * 0.4, 44 + kick, 5.5, 0, Math.PI * 2); c.arc(10 + kick * 0.4, 44 - kick, 5.5, 0, Math.PI * 2); c.fill();
+            // 몸통
+            c.fillStyle = '#38bdf8'; c.beginPath(); c.roundRect(-12, 6, 24, 26, 9); c.fill();
+            c.fillStyle = '#ffffff'; c.beginPath(); c.roundRect(-12, 17, 24, 4, 2); c.fill();
+            c.fillStyle = '#facc15'; c.beginPath(); c.arc(0, 12, 3, 0, Math.PI * 2); c.fill();
+            // 팔
+            const flap = Math.sin(t * 6) * 8;
+            c.strokeStyle = '#38bdf8'; c.lineWidth = 8;
+            c.beginPath(); c.moveTo(-11, 12); c.lineTo(-31, 3 + flap); c.moveTo(11, 12); c.lineTo(31, 3 - flap); c.stroke();
+            c.fillStyle = '#fed7aa'; c.beginPath(); c.arc(-32, 3 + flap, 5.5, 0, Math.PI * 2); c.arc(32, 3 - flap, 5.5, 0, Math.PI * 2); c.fill();
+            // 머리
+            c.fillStyle = '#fed7aa'; c.strokeStyle = '#d97706'; c.lineWidth = 2;
+            c.beginPath(); c.arc(0, -10, 19, 0, Math.PI * 2); c.fill(); c.stroke();
+            c.fillStyle = '#fed7aa'; c.beginPath(); c.arc(-20, -10, 5, 0, Math.PI * 2); c.arc(20, -10, 5, 0, Math.PI * 2); c.fill();
+            // 머리카락 (헬멧 없음)
+            c.fillStyle = '#7c2d12';
+            c.beginPath(); c.arc(0, -10, 19.5, Math.PI * 1.06, Math.PI * 1.94); c.quadraticCurveTo(10, -22, 0, -19); c.quadraticCurveTo(-10, -22, -18.5, -16.5); c.closePath(); c.fill();
+            const hs = Math.sin(t * 9) * 2;
+            c.beginPath(); c.moveTo(-9, -27); c.quadraticCurveTo(-15 - hs, -24, -19, -18); c.quadraticCurveTo(-13, -23, -9, -27); c.fill();
+            c.beginPath(); c.moveTo(9, -27); c.quadraticCurveTo(15 + hs, -24, 19, -18); c.quadraticCurveTo(13, -23, 9, -27); c.fill();
+            // 얼굴
+            const blink = (t % 3.2) < 0.13;
+            if (blink) {
+                c.strokeStyle = '#1e293b'; c.lineWidth = 2;
+                c.beginPath(); c.moveTo(-9, -8); c.lineTo(-3, -8); c.moveTo(3, -8); c.lineTo(9, -8); c.stroke();
+            } else {
+                c.fillStyle = '#1e293b'; c.beginPath(); c.arc(-6, -8, 3.4, 0, Math.PI * 2); c.arc(6, -8, 3.4, 0, Math.PI * 2); c.fill();
+                c.fillStyle = '#ffffff'; c.beginPath(); c.arc(-5, -9.2, 1.2, 0, Math.PI * 2); c.arc(7, -9.2, 1.2, 0, Math.PI * 2); c.fill();
+            }
+            c.fillStyle = 'rgba(244,63,94,0.75)'; c.beginPath(); c.arc(-11, -2, 3.2, 0, Math.PI * 2); c.arc(11, -2, 3.2, 0, Math.PI * 2); c.fill();
+            c.fillStyle = '#1e293b'; c.beginPath(); c.ellipse(0, 2.5, 4.4, 2.6 + (Math.sin(t * 8) + 1) * 1.5, 0, 0, Math.PI * 2); c.fill();
+            c.restore();
+        }
+
+        // 정장 코알라 (팔다리 허우적 + 눈 깜빡임)
+        function drawMenuKoala(c, t) {
+            c.save(); c.rotate(Math.sin(t * 2.1) * 0.17); c.lineCap = 'round';
+            const a = Math.sin(t * 5.2) * 11;
+            c.strokeStyle = '#0f172a'; c.lineWidth = 9;
+            c.beginPath(); c.moveTo(-8, 48); c.lineTo(-13, 70 + a * 0.5); c.moveTo(8, 48); c.lineTo(13, 70 - a * 0.5); c.stroke();
+            c.fillStyle = '#94a3b8'; c.beginPath(); c.arc(-13, 73 + a * 0.5, 6.5, 0, Math.PI * 2); c.arc(13, 73 - a * 0.5, 6.5, 0, Math.PI * 2); c.fill();
+            c.strokeStyle = '#0f172a'; c.lineWidth = 9;
+            c.beginPath(); c.moveTo(-15, 28); c.lineTo(-36, 10 + a); c.moveTo(15, 28); c.lineTo(36, 10 - a); c.stroke();
+            c.fillStyle = '#94a3b8'; c.beginPath(); c.arc(-37, 9 + a, 6.5, 0, Math.PI * 2); c.arc(37, 9 - a, 6.5, 0, Math.PI * 2); c.fill();
+            c.fillStyle = '#0f172a'; c.beginPath(); c.roundRect(-18, 22, 36, 32, 9); c.fill();
+            drawWrinkledKoalaFace(c, 1, true, t);
+            if ((t % 3.6) < 0.13) {
+                c.fillStyle = '#94a3b8'; c.beginPath(); c.arc(-8, 2, 3.8, 0, Math.PI * 2); c.arc(8, 2, 3.8, 0, Math.PI * 2); c.fill();
+                c.strokeStyle = '#0f172a'; c.lineWidth = 1.8; c.beginPath(); c.moveTo(-11, 2.5); c.lineTo(-5, 2.5); c.moveTo(5, 2.5); c.lineTo(11, 2.5); c.stroke();
+            }
+            c.restore();
+        }
+
+        // 할가스 슈퍼 할머니 (무지개 오라 + 팔다리 + 안경 반짝)
+        function drawMenuGrandma(c, t) {
+            c.save(); c.rotate(Math.sin(t * 1.8 + 1) * 0.16); c.lineCap = 'round';
+            c.save(); c.strokeStyle = `hsla(${(t * 90) % 360},100%,68%,0.85)`; c.lineWidth = 3.5; c.setLineDash([10, 7]); c.lineDashOffset = -t * 30;
+            c.beginPath(); c.arc(0, 18, 52 + Math.sin(t * 3) * 3, 0, Math.PI * 2); c.stroke(); c.restore();
+            const a = Math.sin(t * 4.6) * 12;
+            c.strokeStyle = '#7c3aed'; c.lineWidth = 9;
+            c.beginPath(); c.moveTo(-8, 46); c.lineTo(-12, 66 + a * 0.5); c.moveTo(8, 46); c.lineTo(12, 66 - a * 0.5); c.stroke();
+            c.fillStyle = '#1e293b'; c.beginPath(); c.arc(-12, 69 + a * 0.5, 6.5, 0, Math.PI * 2); c.arc(12, 69 - a * 0.5, 6.5, 0, Math.PI * 2); c.fill();
+            c.strokeStyle = '#be185d'; c.lineWidth = 9;
+            c.beginPath(); c.moveTo(-14, 26); c.lineTo(-36, 12 + a); c.moveTo(14, 26); c.lineTo(36, 12 - a); c.stroke();
+            c.fillStyle = '#fde68a'; c.beginPath(); c.arc(-37, 11 + a, 6, 0, Math.PI * 2); c.arc(37, 11 - a, 6, 0, Math.PI * 2); c.fill();
+            c.fillStyle = '#be185d'; c.beginPath(); c.roundRect(-17, 22, 34, 30, 10); c.fill();
+            c.fillStyle = '#fbcfe8'; c.beginPath(); c.roundRect(-8, 30, 16, 16, 5); c.fill();
+            drawWrinkledGrandmaFace(c, 1.15, t);
+            const g = 0.4 + 0.6 * Math.abs(Math.sin(t * 2.4));
+            c.fillStyle = `rgba(255,255,255,${g})`; c.beginPath(); c.arc(-10.5, 1.6, 1.7, 0, Math.PI * 2); c.arc(5.5, 1.6, 1.7, 0, Math.PI * 2); c.fill();
+            c.restore();
+        }
+
+        function menuDraw(dt) {
+            const c = mctx, W = menuW, H = menuH, t = menuT, m = Math.min(W, H), land = W / H >= 1.05;
+            // 하늘
+            const sky = c.createLinearGradient(0, 0, 0, H);
+            sky.addColorStop(0, '#2b8ff0'); sky.addColorStop(0.5, '#6cc4fb'); sky.addColorStop(1, '#d9f2ff');
+            c.fillStyle = sky; c.fillRect(0, 0, W, H);
+            // 해 + 회전 광선
+            const sx = land ? W * 0.9 : W * 0.5, sy = land ? H * 0.15 : H * 0.02, sr = m * 0.07;
+            const glow = c.createRadialGradient(sx, sy, sr * 0.3, sx, sy, sr * 4);
+            glow.addColorStop(0, 'rgba(255,244,180,0.95)'); glow.addColorStop(0.25, 'rgba(255,230,140,0.45)'); glow.addColorStop(1, 'rgba(255,230,140,0)');
+            c.fillStyle = glow; c.fillRect(sx - sr * 4, sy - sr * 4, sr * 8, sr * 8);
+            c.save(); c.translate(sx, sy); c.rotate(t * 0.12); c.fillStyle = 'rgba(255,247,200,0.22)';
+            for (let i = 0; i < 14; i++) { c.rotate(Math.PI * 2 / 14); c.beginPath(); c.moveTo(sr * 1.2, -sr * 0.16); c.lineTo(sr * 3.4, -sr * 0.05); c.lineTo(sr * 3.4, sr * 0.05); c.lineTo(sr * 1.2, sr * 0.16); c.closePath(); c.fill(); }
+            c.restore();
+            c.fillStyle = '#fff3b0'; c.beginPath(); c.arc(sx, sy, sr, 0, Math.PI * 2); c.fill();
+            // 반짝이
+            for (const s of menuSparks) {
+                const k = Math.abs(Math.sin(t * s.sp + s.ph)); const r = s.r * (0.7 + 0.5 * k);
+                c.save(); c.globalAlpha = 0.25 + 0.55 * k; c.fillStyle = '#fff'; c.translate(s.x, s.y); c.rotate(Math.PI / 4 * Math.sin(t + s.ph));
+                c.beginPath(); c.moveTo(0, -r * 2); c.lineTo(r * 0.5, -r * 0.5); c.lineTo(r * 2, 0); c.lineTo(r * 0.5, r * 0.5); c.lineTo(0, r * 2); c.lineTo(-r * 0.5, r * 0.5); c.lineTo(-r * 2, 0); c.lineTo(-r * 0.5, -r * 0.5); c.closePath(); c.fill(); c.restore();
+            }
+            // 구름 (흘러가는 3겹)
+            for (const cl of menuClouds) {
+                cl.x += cl.speed * dt;
+                if (cl.x - cl.size * 2 > W) { cl.x = -cl.size * 2.5; cl.y = Math.random() * H * 0.9; }
+                menuCloud(c, cl.x, cl.y + Math.sin(t * 0.6 + cl.bob) * 6, cl.size, cl.alpha);
+            }
+            // 새
+            for (const b of menuBirds) {
+                b.x += b.speed * dt; if (b.x > W + 60) { b.x = -60; b.y = H * (0.1 + Math.random() * 0.5); }
+                menuBird(c, b.x, b.y + Math.sin(t * 1.5 + b.ph) * 10, b.s, t + b.ph);
+            }
+            // 바람 줄기
+            c.save(); c.lineWidth = 2; c.lineCap = 'round';
+            for (const s of menuStreaks) {
+                s.x += 0.6 * s.sp * dt; s.y -= 0.8 * s.sp * dt;
+                if (s.x > W + s.len || s.y < -s.len) { s.x = Math.random() * W * 1.5 - W * 0.5; s.y = H + s.len; }
+                c.strokeStyle = `rgba(255,255,255,${s.a})`; c.beginPath(); c.moveTo(s.x, s.y); c.lineTo(s.x - 0.6 * s.len, s.y + 0.8 * s.len); c.stroke();
+            }
+            c.restore();
+            // 떠다니는 두부
+            for (const f of menuTofus) {
+                f.y -= f.sp * dt; if (f.y < -60) { f.y = H + 60; f.x = Math.random() * W; }
+                c.save(); c.translate(f.x + Math.sin(t * 0.8 + f.ph) * 16, f.y); c.rotate(Math.sin(t + f.ph) * 0.2); c.scale(f.s, f.s); menuTofu(c, t); c.restore();
+            }
+            // 캐릭터
+            const L = land ? { dv: [0.62, 0.55, 0.0036], ko: [0.47, 0.2, 0.0024], gr: [0.77, 0.74, 0.0027] }
+                           : { dv: [0.45, 0.38, 0.0046], ko: [0.80, 0.24, 0.0034], gr: [0.76, 0.53, 0.0038] };
+            c.save(); c.translate(L.ko[0] * W + Math.sin(t * 0.9) * m * 0.02, L.ko[1] * H + Math.sin(t * 1.7) * m * 0.015); c.scale(L.ko[2] * m, L.ko[2] * m); drawMenuKoala(c, t); c.restore();
+            c.save(); c.translate(L.gr[0] * W + Math.sin(t * 0.7 + 2) * m * 0.02, L.gr[1] * H + Math.sin(t * 1.4 + 1) * m * 0.018); c.scale(L.gr[2] * m, L.gr[2] * m); drawMenuGrandma(c, t); c.restore();
+            c.save(); c.translate(L.dv[0] * W + Math.sin(t * 1.3) * m * 0.008, L.dv[1] * H + Math.sin(t * 1.9) * m * 0.012); c.rotate(Math.PI * 1.25 + Math.sin(t * 1.5) * 0.06); c.scale(L.dv[2] * m, L.dv[2] * m); drawMenuDiver(c, t, 0.8); c.restore();
+            // 앞쪽 구름층
+            for (let i = 0; i < 9; i++) {
+                const bx = ((i * W / 6 + t * 14) % (W + 300)) - 150, r = m * (0.09 + 0.03 * ((i * 7) % 3));
+                menuCloud(c, bx, H + m * 0.015, r, 0.95);
+            }
+        }
+
+        function menuFrame(now) {
+            if (!menuRunning) return;
+            const dt = Math.min(0.05, (now - menuLast) / 1000 || 0.016); menuLast = now; menuT += dt;
+            menuDraw(dt);
+            requestAnimationFrame(menuFrame);
+        }
+        function menuStart() { if (menuRunning) return; menuRunning = true; menuLast = performance.now(); requestAnimationFrame(menuFrame); }
+        function menuStop() { menuRunning = false; }
+
+        let menuToastTimer = null;
+        function menuToast(msg) {
+            const el = document.getElementById('menuToast'); el.textContent = msg; el.style.opacity = '1';
+            clearTimeout(menuToastTimer); menuToastTimer = setTimeout(() => { el.style.opacity = '0'; }, 1800);
+        }
+
+        function initMenu() {
+            menuResize();
+            window.addEventListener('resize', menuResize);
+            new MutationObserver(() => { menuEl.classList.contains('hidden') ? menuStop() : menuStart(); }).observe(menuEl, { attributes: true, attributeFilter: ['class'] });
+            document.getElementById('bossBtn').addEventListener('click', () => { sounds.playClick(); menuToast('🔥 보스전은 아직 출시 전이에요!'); });
+            document.getElementById('shopBtn').addEventListener('click', () => { sounds.playClick(); menuToast('🏪 상점은 곧 열려요!'); });
+            const helpPanel = document.getElementById('helpPanel');
+            document.getElementById('helpBtn').addEventListener('click', () => { sounds.playClick(); helpPanel.classList.add('show'); });
+            helpPanel.addEventListener('click', () => helpPanel.classList.remove('show'));
+            if (!menuEl.classList.contains('hidden')) menuStart();
+        }
+
+        window.onload=function(){initMenu();sounds.loadBGM();gameLoop();};
     </script>
 </body>
 </html>

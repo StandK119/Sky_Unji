@@ -122,6 +122,9 @@
         .shop-coins { font-weight: 900; font-size: .85rem; color: #fde047; background: rgba(15,23,42,.7); padding: .05rem .6rem; border-radius: 999px; }
         .shop-screen { position: absolute; inset: 0; z-index: 30; display: none; align-items: center; justify-content: center; background: rgba(2,6,23,.55); padding: 16px; }
         .shop-screen.show { display: flex; }
+        .shop-screen, .shop-panel, .shop-panel *, .help-card, .help-card * { touch-action: pan-y; }
+        .shop-panel, .shop-screen { overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+        .shop-panel { scrollbar-width: thin; scrollbar-color: #f59e0b #fef3c7; }
         .shop-panel { width: 100%; max-width: 32rem; max-height: 92vh; overflow: auto; background: linear-gradient(180deg,#fff7ed,#fef3c7); border: 4px solid #fff; border-radius: 1.6rem; padding: 1rem 1.1rem 1.2rem; box-shadow: 0 24px 60px rgba(0,0,0,.4); color: #78350f; }
         .shop-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: .8rem; }
         .shop-head h2 { margin: 0; font-family: 'Jua','Nunito',sans-serif; font-size: 1.6rem; }
@@ -243,7 +246,7 @@
                 <p>• 🪶 <b>중력:</b> 낙하 속도를 완화해주는 아이템</p>
                 <p>• 👵 <b>할가스:</b> 희귀 슈퍼 모드 (일반 2% / 하드 1%) · 3.25배 가속 &amp; 무적</p>
                 <p style="color:#be123c">• 🦉 <b>하드 모드:</b> 붉은 부엉이 하늘, 아이템이 훨씬 적게 나와요</p>
-                <p style="color:#b45309">• 🪙 <b>코인:</b> 523m 돌파 시 일반 2코인 / 하드 5코인, 일반 2000m / 하드 1000m 돌파 시 10코인! 상점에서 스킨을 살 수 있어요</p>
+                <p style="color:#b45309">• 🪙 <b>코인:</b> 523m씩 내려갈 때마다 일반 4코인 / 하드 6코인, 일반 2000m / 하드 1000m 돌파 시 10코인! 상점에서 스킨을 살 수 있어요</p>
                 <p style="color:#4338ca">• 🎵 모드를 선택하면 <b>배경음악이 자동으로 재생</b>됩니다!</p>
                 <p style="text-align:center;margin-top:.7rem;opacity:.7">(아무 곳이나 누르면 닫혀요)</p>
             </div>
@@ -511,8 +514,8 @@
         });
 
         const MODES = {
-            normal: { name:'일반', itemCount:4, yBase:200, yRange:400, weights:{halgas:0.02, koala:0.37, slow:0.37, tofu:0.24}, storageKey:'skyDiverHighScore', coinGoal:2000, bonusGoal:523, bonusReward:2 },
-            hard:   { name:'하드', itemCount:2, yBase:600, yRange:1000, weights:{halgas:0.01, koala:0.30, slow:0.39, tofu:0.30}, storageKey:'skyDiverHighScoreHard', coinGoal:1000, bonusGoal:523, bonusReward:5 }
+            normal: { name:'일반', itemCount:4, yBase:200, yRange:400, weights:{halgas:0.02, koala:0.37, slow:0.37, tofu:0.24}, storageKey:'skyDiverHighScore', coinGoal:2000, bonusGoal:523, bonusReward:4 },
+            hard:   { name:'하드', itemCount:2, yBase:600, yRange:1000, weights:{halgas:0.01, koala:0.30, slow:0.39, tofu:0.30}, storageKey:'skyDiverHighScoreHard', coinGoal:1000, bonusGoal:523, bonusReward:6 }
         };
         let currentMode = 'normal';
         function lsGet(k, d) { try { const v = localStorage.getItem(k); return v === null ? d : v; } catch (e) { return d; } }
@@ -520,7 +523,7 @@
         let coins = parseInt(lsGet('skyDiverCoins', '0'), 10) || 0;
         let ownedSkins = (() => { try { const a = JSON.parse(lsGet('skyDiverOwned', '["default"]')); return Array.isArray(a) && a.includes('default') ? a : ['default']; } catch (e) { return ['default']; } })();
         let currentSkin = lsGet('skyDiverSkin', 'default'); if (!ownedSkins.includes(currentSkin)) currentSkin = 'default';
-        let coinAwarded = false, bonusAwarded = false, runCoins = 0;
+        let coinAwarded = false, bonusNext = 523, runCoins = 0;
         let highScore = localStorage.getItem(MODES.normal.storageKey) || 0;
         let baseSpeed = 4.2;
         let distance = 0;
@@ -850,6 +853,8 @@
                     drawWrinkledKoalaFace(ctx, 1.0, true, this.wobble);
                     ctx.beginPath(); ctx.arc(0, 8, this.radius+14, 0, Math.PI*2);
                     ctx.strokeStyle = 'rgba(16,185,129,0.7)'; ctx.lineWidth = 3; ctx.setLineDash([8,6]); ctx.stroke();
+                } else if (currentSkin === 'vip') {
+                    drawVipSkin(ctx, this.wobble);
                 } else if (currentSkin === 'president') {
                     drawPresidentSkin(ctx, this.wobble);
                 } else {
@@ -1172,10 +1177,72 @@
             c.restore();
         }
 
+        // 황금빛 반짝이 (프리미엄 스킨 전용 이펙트)
+        function drawGoldSparkles(c, t, k = 1) {
+            c.save();
+            for (let i = 0; i < 8; i++) {
+                const a = t * 1.6 + i * Math.PI / 4, r = (30 + (i % 3) * 6) * k;
+                const x = Math.cos(a) * r, y = Math.sin(a) * r * 0.9;
+                const s = (2.2 + (i % 3) * 0.8) * (0.7 + 0.5 * Math.abs(Math.sin(t * 3 + i)));
+                c.globalAlpha = 0.55 + 0.4 * Math.abs(Math.sin(t * 2.4 + i));
+                c.fillStyle = '#fde047'; c.shadowColor = '#f59e0b'; c.shadowBlur = 8;
+                c.beginPath(); c.moveTo(x, y - s * 2); c.lineTo(x + s * 0.55, y - s * 0.55); c.lineTo(x + s * 2, y); c.lineTo(x + s * 0.55, y + s * 0.55);
+                c.lineTo(x, y + s * 2); c.lineTo(x - s * 0.55, y + s * 0.55); c.lineTo(x - s * 2, y); c.lineTo(x - s * 0.55, y - s * 0.55); c.closePath(); c.fill();
+            }
+            c.restore();
+        }
+
+        // 프리미엄 대통령 스킨 (오리지널 캐릭터: 줄무늬 정장 + 보라 넥타이 + 황금 반짝이, 얼굴은 기본 얼굴)
+        function drawVipSkin(c, wobble) {
+            c.save();
+            drawGoldSparkles(c, wobble / 9, 1);
+            c.strokeStyle = 'rgba(255,255,255,0.7)'; c.lineWidth = 1.5;
+            for (let i = -2; i <= 2; i += 2) {
+                const lineOffset = (wobble * 30 + i * 15) % 60;
+                c.beginPath(); c.moveTo(i * 12, -30 + lineOffset); c.lineTo(i * 12, -10 + lineOffset); c.stroke();
+            }
+            const flameScale = 1 + Math.sin(wobble * 2) * 0.15;
+            c.save(); c.translate(0, 10);
+            c.fillStyle = '#ef4444'; c.shadowColor = '#f97316'; c.shadowBlur = 20;
+            c.beginPath(); c.moveTo(-22 * flameScale, -5); c.quadraticCurveTo(0, 45 * flameScale, 22 * flameScale, -5); c.quadraticCurveTo(0, 15, -22 * flameScale, -5); c.fill();
+            c.fillStyle = '#facc15'; c.beginPath(); c.moveTo(-15 * flameScale, -2); c.quadraticCurveTo(0, 32 * flameScale, 15 * flameScale, -2); c.quadraticCurveTo(0, 10, -15 * flameScale, -2); c.fill();
+            c.fillStyle = '#ffffff'; c.beginPath(); c.moveTo(-8 * flameScale, 0); c.quadraticCurveTo(0, 20 * flameScale, 8 * flameScale, 0); c.fill();
+            c.restore();
+            // 다리 (줄무늬 바지 + 구두)
+            c.fillStyle = '#1f2937'; c.beginPath(); c.roundRect(-10, -32, 8, 14, 4); c.roundRect(2, -32, 8, 14, 4); c.fill();
+            c.strokeStyle = 'rgba(255,255,255,0.3)'; c.lineWidth = 0.8;
+            c.beginPath(); c.moveTo(-6, -31); c.lineTo(-6, -19); c.moveTo(6, -31); c.lineTo(6, -19); c.stroke();
+            c.fillStyle = '#0b0f19'; c.beginPath(); c.arc(-6, -32, 5, 0, Math.PI * 2); c.arc(6, -32, 5, 0, Math.PI * 2); c.fill();
+            // 몸통: 줄무늬 정장 + 와이셔츠 + 보라 줄무늬 넥타이 + 금색 핀
+            c.fillStyle = '#1f2937'; c.beginPath(); c.roundRect(-14, -22, 28, 24, 8); c.fill();
+            c.strokeStyle = 'rgba(255,255,255,0.3)'; c.lineWidth = 0.8;
+            for (let i = -12; i <= 12; i += 4) { c.beginPath(); c.moveTo(i, -21); c.lineTo(i, 1); c.stroke(); }
+            c.fillStyle = '#ffffff'; c.beginPath(); c.moveTo(-6, -22); c.lineTo(0, -12.5); c.lineTo(6, -22); c.closePath(); c.fill();
+            c.fillStyle = '#7c3aed'; c.strokeStyle = '#5b21b6'; c.lineWidth = 0.8;
+            c.beginPath(); c.moveTo(-2.2, -22); c.lineTo(2.2, -22); c.lineTo(1.8, -19); c.lineTo(-1.8, -19); c.closePath(); c.fill();
+            c.beginPath(); c.moveTo(-1.8, -19); c.lineTo(1.8, -19); c.lineTo(3, -13.5); c.lineTo(0, -10.5); c.lineTo(-3, -13.5); c.closePath(); c.fill(); c.stroke();
+            c.strokeStyle = '#c4b5fd'; c.lineWidth = 0.9;
+            c.beginPath(); c.moveTo(-1.7, -17.6); c.lineTo(1.7, -16.2); c.moveTo(-2.3, -14.9); c.lineTo(2.3, -13.3); c.stroke();
+            c.fillStyle = '#facc15'; c.beginPath(); c.arc(-9, -13, 1.9, 0, Math.PI * 2); c.fill();
+            // 손 / 귀
+            c.fillStyle = '#fed7aa'; c.beginPath(); c.arc(-18, -8, 5, 0, Math.PI * 2); c.arc(18, -8, 5, 0, Math.PI * 2); c.fill();
+            // 얼굴 (기본 다이버와 같은 귀여운 얼굴)
+            c.beginPath(); c.arc(0, 6, 16, 0, Math.PI * 2); c.fillStyle = '#fed7aa'; c.fill(); c.strokeStyle = '#d97706'; c.lineWidth = 2; c.stroke();
+            // 짙은 갈색 머리 (위로 넘긴 스타일)
+            c.fillStyle = '#2b1a12';
+            c.beginPath(); c.arc(0, 6, 16.8, Math.PI * 1.08, Math.PI * 1.92); c.quadraticCurveTo(8, -3, -2, -3.5); c.quadraticCurveTo(-9, -4, -16.3, 1.8); c.closePath(); c.fill();
+            c.strokeStyle = 'rgba(255,255,255,0.25)'; c.lineWidth = 1; c.beginPath(); c.arc(0, 6, 14, Math.PI * 1.25, Math.PI * 1.5); c.stroke();
+            c.fillStyle = '#1e293b'; c.beginPath(); c.arc(-5, 8, 3, 0, Math.PI * 2); c.arc(5, 8, 3, 0, Math.PI * 2); c.fill();
+            c.fillStyle = '#f43f5e'; c.beginPath(); c.arc(-8, 12, 2.5, 0, Math.PI * 2); c.arc(8, 12, 2.5, 0, Math.PI * 2); c.fill();
+            c.beginPath(); c.arc(0, 13, 4, 0, Math.PI * 2); c.fillStyle = '#1e293b'; c.fill();
+            c.restore();
+        }
+
         // ===================== 상점 / 코인 =====================
         const SKINS = [
             { id: 'default', name: '기본 다이버', price: 0, desc: '지금까지 함께한 용감한 다이버' },
-            { id: 'president', name: '대통령 스킨', price: 100, desc: '정장을 차려입은 근엄한 지도자 스타일' }
+            { id: 'president', name: '대통령 스킨', price: 70, desc: '정장을 차려입은 근엄한 지도자 스타일' },
+            { id: 'vip', name: 'DJ', price: 325, desc: '줄무늬 정장 · 보라 넥타이 · 반짝이는 황금빛' }
         ];
         function saveShop() { lsSet('skyDiverCoins', String(coins)); lsSet('skyDiverOwned', JSON.stringify(ownedSkins)); lsSet('skyDiverSkin', currentSkin); }
         function updateCoinUI() {
@@ -1187,6 +1254,7 @@
         function showCoinBanner(n) {
             const container = document.getElementById('milestoneContainer');
             const b = document.createElement('div'); b.className = 'milestone-banner coin-banner';
+            b.style.top = (5.2 + container.querySelectorAll('.coin-banner').length * 4.4) + 'rem';
             b.innerHTML = '<span class="coin-banner-sub">🪙 코인 획득!</span><span>+' + n + ' 코인</span>';
             container.appendChild(b); setTimeout(() => b.remove(), 3200);
         }
@@ -1224,7 +1292,7 @@
             for (const cd of shopCards) {
                 const c = cd.ctx; c.clearRect(0, 0, 220, 260);
                 c.save(); c.translate(110, 112 + Math.sin(t * 2.2) * 4); c.scale(2.3, 2.3);
-                if (cd.id === 'president') drawPresidentSkin(c, t * 9); else drawDefaultSprite(c, t * 9);
+                if (cd.id === 'vip') drawVipSkin(c, t * 9); else if (cd.id === 'president') drawPresidentSkin(c, t * 9); else drawDefaultSprite(c, t * 9);
                 c.restore();
             }
             requestAnimationFrame(shopFrame);
@@ -1241,7 +1309,7 @@
         let items = Array.from({length:4}, ()=>new Item());
 
         function resetGame() {
-            distance=0; coinAwarded=false; bonusAwarded=false; runCoins=0; achievedMilestones.clear();
+            distance=0; coinAwarded=false; bonusNext=MODES[currentMode].bonusGoal; runCoins=0; achievedMilestones.clear();
             document.getElementById('milestoneContainer').innerHTML='';
             player=new Player(); targetX=width/2;
             clouds.forEach(c=>c.reset(true));
@@ -1261,8 +1329,9 @@
             distance+=(baseSpeed*speedMultiplier)*0.08;
             if (distance<0) distance=0;
             checkMilestones(Math.floor(distance));
-            if (!bonusAwarded && distance >= MODES[currentMode].bonusGoal) {
-                bonusAwarded = true; const r = MODES[currentMode].bonusReward; runCoins += r; addCoins(r); showCoinBanner(r); sounds.playStar();
+            while (distance >= bonusNext) {
+                const r = MODES[currentMode].bonusReward; runCoins += r; addCoins(r); showCoinBanner(r); sounds.playStar();
+                bonusNext += MODES[currentMode].bonusGoal;
             }
             if (!coinAwarded && distance >= MODES[currentMode].coinGoal) {
                 coinAwarded = true; runCoins += 10; addCoins(10); showCoinBanner(10); sounds.playMilestone();
@@ -1474,7 +1543,8 @@
 
         // 큰 스카이다이버 (불꽃 꼬리, 팔다리·표정 애니메이션)
         function drawMenuDiver(c, t, trail = 1, skin = 'default') {
-            const P = skin === 'president';
+            const V = skin === 'vip'; const P = skin === 'president' || V;
+            if (V) drawGoldSparkles(c, t, 1.5);
             c.save(); c.lineCap = 'round'; c.lineJoin = 'round';
             // 대기권 돌파 불꽃: 머리 앞쪽에서 타오르며 몸 양옆을 따라 뒤로 길게 흐른다
             c.save();
@@ -1520,10 +1590,11 @@
             c.beginPath(); c.moveTo(-6, 26); c.lineTo(-10 - kick * 0.4, 42 + kick); c.moveTo(6, 26); c.lineTo(10 + kick * 0.4, 42 - kick); c.stroke();
             c.fillStyle = P ? '#111827' : '#ef4444'; c.beginPath(); c.arc(-10 - kick * 0.4, 44 + kick, 5.5, 0, Math.PI * 2); c.arc(10 + kick * 0.4, 44 - kick, 5.5, 0, Math.PI * 2); c.fill();
             // 몸통
-            c.fillStyle = P ? '#1e3a8a' : '#38bdf8'; c.beginPath(); c.roundRect(-12, 6, 24, 26, 9); c.fill();
+            c.fillStyle = V ? '#1f2937' : (P ? '#1e3a8a' : '#38bdf8'); c.beginPath(); c.roundRect(-12, 6, 24, 26, 9); c.fill();
+            if (V) { c.strokeStyle = 'rgba(255,255,255,0.28)'; c.lineWidth = 0.8; for (let i = -9; i <= 9; i += 4.5) { c.beginPath(); c.moveTo(i, 7); c.lineTo(i, 31); c.stroke(); } }
             if (P) {
                 c.fillStyle = '#ffffff'; c.beginPath(); c.moveTo(-6, 6); c.lineTo(0, 17); c.lineTo(6, 6); c.closePath(); c.fill();
-                c.fillStyle = '#16a34a'; c.beginPath(); c.moveTo(-2.2, 9); c.lineTo(2.2, 9); c.lineTo(3.2, 22); c.lineTo(0, 26); c.lineTo(-3.2, 22); c.closePath(); c.fill();
+                c.fillStyle = V ? '#7c3aed' : '#16a34a'; c.beginPath(); c.moveTo(-2.2, 9); c.lineTo(2.2, 9); c.lineTo(3.2, 22); c.lineTo(0, 26); c.lineTo(-3.2, 22); c.closePath(); c.fill();
                 c.fillStyle = '#facc15'; c.beginPath(); c.arc(-7.5, 20, 2.3, 0, Math.PI * 2); c.fill();
             } else {
                 c.fillStyle = '#ffffff'; c.beginPath(); c.roundRect(-12, 17, 24, 4, 2); c.fill();
@@ -1531,7 +1602,7 @@
             }
             // 팔
             const flap = Math.sin(t * 6) * 8;
-            c.strokeStyle = P ? '#1e3a8a' : '#38bdf8'; c.lineWidth = 8;
+            c.strokeStyle = V ? '#1f2937' : (P ? '#1e3a8a' : '#38bdf8'); c.lineWidth = 8;
             c.beginPath(); c.moveTo(-11, 12); c.lineTo(-31, 3 + flap); c.moveTo(11, 12); c.lineTo(31, 3 - flap); c.stroke();
             c.fillStyle = '#fed7aa'; c.beginPath(); c.arc(-32, 3 + flap, 5.5, 0, Math.PI * 2); c.arc(32, 3 - flap, 5.5, 0, Math.PI * 2); c.fill();
             // 머리
@@ -1539,7 +1610,7 @@
             c.beginPath(); c.arc(0, -10, 19, 0, Math.PI * 2); c.fill(); c.stroke();
             c.fillStyle = '#fed7aa'; c.beginPath(); c.arc(-20, -10, 5, 0, Math.PI * 2); c.arc(20, -10, 5, 0, Math.PI * 2); c.fill();
             // 머리카락 (헬멧 없음)
-            c.fillStyle = P ? '#e5e7eb' : '#7c2d12';
+            c.fillStyle = V ? '#2b1a12' : (P ? '#e5e7eb' : '#7c2d12');
             c.beginPath(); c.arc(0, -10, 19.5, Math.PI * 1.06, Math.PI * 1.94); c.quadraticCurveTo(10, -22, 0, -19); c.quadraticCurveTo(-10, -22, -18.5, -16.5); c.closePath(); c.fill();
             const hs = Math.sin(t * 9) * 2;
             c.beginPath(); c.moveTo(-9, -27); c.quadraticCurveTo(-15 - hs, -24, -19, -18); c.quadraticCurveTo(-13, -23, -9, -27); c.fill();
@@ -1554,7 +1625,7 @@
                 c.fillStyle = '#ffffff'; c.beginPath(); c.arc(-5, -9.2, 1.2, 0, Math.PI * 2); c.arc(7, -9.2, 1.2, 0, Math.PI * 2); c.fill();
             }
             c.fillStyle = 'rgba(244,63,94,0.75)'; c.beginPath(); c.arc(-11, -2, 3.2, 0, Math.PI * 2); c.arc(11, -2, 3.2, 0, Math.PI * 2); c.fill();
-            if (P) { c.strokeStyle = '#f59e0b'; c.lineWidth = 1.6; c.beginPath(); c.arc(-6, -8, 5.6, 0, Math.PI * 2); c.moveTo(11.6, -8); c.arc(6, -8, 5.6, 0, Math.PI * 2); c.moveTo(-0.4, -8); c.lineTo(0.4, -8); c.stroke(); }
+            if (P && !V) { c.strokeStyle = '#f59e0b'; c.lineWidth = 1.6; c.beginPath(); c.arc(-6, -8, 5.6, 0, Math.PI * 2); c.moveTo(11.6, -8); c.arc(6, -8, 5.6, 0, Math.PI * 2); c.moveTo(-0.4, -8); c.lineTo(0.4, -8); c.stroke(); }
             c.fillStyle = '#1e293b'; c.beginPath(); c.ellipse(0, 2.5, 4.4, 2.6 + (Math.sin(t * 8) + 1) * 1.5, 0, 0, Math.PI * 2); c.fill();
             c.restore();
         }

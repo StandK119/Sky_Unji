@@ -246,7 +246,7 @@
                 <p>• 🪶 <b>중력:</b> 낙하 속도를 완화해주는 아이템</p>
                 <p>• 👵 <b>할가스:</b> 희귀 슈퍼 모드 (일반 2% / 하드 1%) · 3.25배 가속 &amp; 무적</p>
                 <p style="color:#be123c">• 🦉 <b>하드 모드:</b> 붉은 부엉이 하늘, 아이템이 훨씬 적게 나와요</p>
-                <p style="color:#b45309">• 🪙 <b>코인:</b> 523m씩 내려갈 때마다 일반 4코인 / 하드 6코인, 일반 2000m / 하드 1000m 돌파 시 10코인! 상점에서 스킨을 살 수 있어요</p>
+                <p style="color:#b45309">• 🪙 <b>코인:</b> 523m씩 내려갈 때마다 일반 4코인 / 하드 6코인! 상점에서 스킨을 살 수 있어요</p>
                 <p style="color:#4338ca">• 🎵 모드를 선택하면 <b>배경음악이 자동으로 재생</b>됩니다!</p>
                 <p style="text-align:center;margin-top:.7rem;opacity:.7">(아무 곳이나 누르면 닫혀요)</p>
             </div>
@@ -777,15 +777,16 @@
                     this.postHalgasShieldTimer = Math.round(60 * 1.7);
                     triggerHalgasBlast(this.x, this.y);
                 }
-                for (let i = 0; i < (this.halgasTimer > 0 ? 8 : 3); i++) {
+                const vipOn = currentSkin === 'vip' && !this.shield && this.halgasTimer <= 0;
+                for (let i = 0; i < (this.halgasTimer > 0 ? 8 : (vipOn ? 11 : 3)); i++) {
                     this.flameParticles.push({
                         x: this.x + (Math.random() - 0.5) * 32,
-                        y: this.y + 12 + Math.random() * 12,
-                        vx: (Math.random() - 0.5) * 5, vy: -(Math.random() * 10 + 6),
-                        size: Math.random() * 10 + 6,
+                        y: vipOn ? this.y - 30 - Math.random() * 12 : this.y + 12 + Math.random() * 12,
+                        vx: (Math.random() - 0.5) * (vipOn ? 9 : 5), vy: -(Math.random() * 10 + 6),
+                        size: Math.random() * 10 + (vipOn ? 8 : 6),
                         color: this.halgasTimer > 0
                             ? ['#ec4899','#8b5cf6','#3b82f6','#10b981','#f59e0b','#ffffff'][Math.floor(Math.random()*6)]
-                            : ['#ef4444','#f97316','#eab308','#ffffff'][Math.floor(Math.random()*4)],
+                            : (vipOn ? ['#f43f5e','#f97316','#facc15','#22c55e','#38bdf8','#a855f7','#ffffff','#fde047'][Math.floor(Math.random()*8)] : ['#ef4444','#f97316','#eab308','#ffffff'][Math.floor(Math.random()*4)]),
                         life: 1.0
                     });
                 }
@@ -1201,12 +1202,43 @@
                 const lineOffset = (wobble * 30 + i * 15) % 60;
                 c.beginPath(); c.moveTo(i * 12, -30 + lineOffset); c.lineTo(i * 12, -10 + lineOffset); c.stroke();
             }
-            const flameScale = 1 + Math.sin(wobble * 2) * 0.15;
-            c.save(); c.translate(0, 10);
-            c.fillStyle = '#ef4444'; c.shadowColor = '#f97316'; c.shadowBlur = 20;
-            c.beginPath(); c.moveTo(-22 * flameScale, -5); c.quadraticCurveTo(0, 45 * flameScale, 22 * flameScale, -5); c.quadraticCurveTo(0, 15, -22 * flameScale, -5); c.fill();
-            c.fillStyle = '#facc15'; c.beginPath(); c.moveTo(-15 * flameScale, -2); c.quadraticCurveTo(0, 32 * flameScale, 15 * flameScale, -2); c.quadraticCurveTo(0, 10, -15 * flameScale, -2); c.fill();
-            c.fillStyle = '#ffffff'; c.beginPath(); c.moveTo(-8 * flameScale, 0); c.quadraticCurveTo(0, 20 * flameScale, 8 * flameScale, 0); c.fill();
+            // 화려한 무지개 불꽃
+            const tt = wobble / 9;
+            c.save(); c.translate(0, -30); c.scale(1, -1);
+            const aura = c.createRadialGradient(0, 22, 4, 0, 22, 56);
+            aura.addColorStop(0, 'rgba(255,240,150,0.85)'); aura.addColorStop(0.45, 'rgba(244,114,182,0.35)'); aura.addColorStop(1, 'rgba(99,102,241,0)');
+            c.fillStyle = aura; c.beginPath(); c.arc(0, 22, 56, 0, Math.PI * 2); c.fill();
+            c.shadowColor = '#fbbf24'; c.shadowBlur = 22;
+            for (let i = 0; i < 9; i++) {
+                const d = Math.abs(i - 4);
+                const bx = (i - 4) * 3.4, tx = (i - 4) * 8.5 + Math.sin(tt * 14 + i) * 5;
+                const ty = 44 + (4 - d) * 9 + Math.sin(tt * 12 + i * 1.7) * 9;
+                const w = 7.5 - d * 0.6, hue = (tt * 160 + i * 40) % 360;
+                const g = c.createLinearGradient(0, -3, 0, ty);
+                g.addColorStop(0, 'rgba(255,255,255,0.95)'); g.addColorStop(0.3, 'hsla(' + hue + ',100%,62%,0.95)'); g.addColorStop(1, 'hsla(' + ((hue + 70) % 360) + ',100%,65%,0)');
+                c.fillStyle = g;
+                c.beginPath(); c.moveTo(bx - w, -3);
+                c.quadraticCurveTo(bx - w * 0.3 + tx * 0.5, ty * 0.55, tx, ty);
+                c.quadraticCurveTo(bx + w * 0.3 + tx * 0.5, ty * 0.55, bx + w, -3);
+                c.closePath(); c.fill();
+            }
+            c.shadowBlur = 0;
+            const core = 1 + Math.sin(wobble * 2.3) * 0.18;
+            c.fillStyle = '#fff7c2'; c.beginPath(); c.moveTo(-9 * core, -3); c.quadraticCurveTo(0, 38 * core, 9 * core, -3); c.quadraticCurveTo(0, 8, -9 * core, -3); c.fill();
+            c.fillStyle = '#ffffff'; c.beginPath(); c.moveTo(-4.5 * core, -2); c.quadraticCurveTo(0, 22 * core, 4.5 * core, -2); c.fill();
+            for (let k = 0; k < 2; k++) {
+                const ph = (tt * 1.6 + k * 0.5) % 1;
+                c.strokeStyle = 'hsla(' + ((tt * 200 + k * 140) % 360) + ',100%,70%,' + ((1 - ph) * 0.7) + ')'; c.lineWidth = 2.2 * (1 - ph) + 0.6;
+                c.beginPath(); c.ellipse(0, 6 + ph * 34, 10 + ph * 20, 4 + ph * 6, 0, 0, Math.PI * 2); c.stroke();
+            }
+            for (let j = 0; j < 9; j++) {
+                const ph = (tt * 1.5 + j * 0.113) % 1, y = 14 + ph * 66, x = Math.sin(j * 2.3 + tt * 4) * (6 + ph * 18);
+                const s = (1.8 + (j % 3) * 0.8) * (1 - ph * 0.6);
+                c.globalAlpha = 1 - ph; c.fillStyle = 'hsl(' + ((tt * 220 + j * 45) % 360) + ',100%,68%)';
+                c.beginPath(); c.moveTo(x, y - s * 2); c.lineTo(x + s * 0.55, y - s * 0.55); c.lineTo(x + s * 2, y); c.lineTo(x + s * 0.55, y + s * 0.55);
+                c.lineTo(x, y + s * 2); c.lineTo(x - s * 0.55, y + s * 0.55); c.lineTo(x - s * 2, y); c.lineTo(x - s * 0.55, y - s * 0.55); c.closePath(); c.fill();
+            }
+            c.globalAlpha = 1;
             c.restore();
             // 다리 (줄무늬 바지 + 구두)
             c.fillStyle = '#1f2937'; c.beginPath(); c.roundRect(-10, -32, 8, 14, 4); c.roundRect(2, -32, 8, 14, 4); c.fill();
@@ -1291,7 +1323,7 @@
             const t = now / 1000;
             for (const cd of shopCards) {
                 const c = cd.ctx; c.clearRect(0, 0, 220, 260);
-                c.save(); c.translate(110, 112 + Math.sin(t * 2.2) * 4); c.scale(2.3, 2.3);
+                const vip = cd.id === 'vip'; c.save(); c.translate(110, (vip ? 178 : 112) + Math.sin(t * 2.2) * 4); c.scale(vip ? 1.75 : 2.3, vip ? 1.75 : 2.3);
                 if (cd.id === 'vip') drawVipSkin(c, t * 9); else if (cd.id === 'president') drawPresidentSkin(c, t * 9); else drawDefaultSprite(c, t * 9);
                 c.restore();
             }
@@ -1332,9 +1364,6 @@
             while (distance >= bonusNext) {
                 const r = MODES[currentMode].bonusReward; runCoins += r; addCoins(r); showCoinBanner(r); sounds.playStar();
                 bonusNext += MODES[currentMode].bonusGoal;
-            }
-            if (!coinAwarded && distance >= MODES[currentMode].coinGoal) {
-                coinAwarded = true; runCoins += 10; addCoins(10); showCoinBanner(10); sounds.playMilestone();
             }
             document.getElementById('scoreText').innerText=`${Math.floor(distance)}m`;
             const buffContainer=document.getElementById('buffContainer');
@@ -1560,7 +1589,7 @@
                     const sway = Math.sin(t * 6 + i * 1.3) * 5 + bx * 0.5;
                     const w = (10 - Math.abs(i - 4) * 0.8) * wk;
                     const g = c.createLinearGradient(0, by, 0, by + len);
-                    g.addColorStop(0, col); g.addColorStop(1, 'rgba(250,204,21,0)');
+                    if (V) { const hue = (t * 140 + i * 32 + wk * 90) % 360; g.addColorStop(0, 'hsla(' + hue + ',100%,62%,0.95)'); g.addColorStop(1, 'hsla(' + ((hue + 60) % 360) + ',100%,70%,0)'); } else { g.addColorStop(0, col); g.addColorStop(1, 'rgba(250,204,21,0)'); }
                     c.fillStyle = g;
                     c.beginPath(); c.moveTo(bx - w, by);
                     c.quadraticCurveTo(bx - w * 0.4 + sway * 0.5, by + len * 0.5, bx + sway, by + len);
@@ -1578,9 +1607,9 @@
             c.restore();
             // 흩날리는 불씨
             c.save();
-            for (let i = 0; i < 16; i++) {
+            for (let i = 0; i < (V ? 40 : 16); i++) {
                 const yy = ((t * 95 + i * 41) % 170) - 20, xx = ((i % 5) - 2) * 15 + Math.sin(t * 5 + i) * 7;
-                c.globalAlpha = Math.max(0, 1 - yy / 170); c.fillStyle = yy < 60 ? '#fde047' : '#f97316';
+                c.globalAlpha = Math.max(0, 1 - yy / 170); c.fillStyle = V ? 'hsl(' + ((t * 200 + i * 30) % 360) + ',100%,65%)' : (yy < 60 ? '#fde047' : '#f97316');
                 c.beginPath(); c.arc(xx, yy, 1.6 + (i % 3) * 0.8, 0, Math.PI * 2); c.fill();
             }
             c.restore();

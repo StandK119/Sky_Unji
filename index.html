@@ -115,6 +115,28 @@
             .title-diver { margin-left: .5em; font-size: clamp(3rem, min(13vh, 18vw), 7rem); }
             .shop-icon { width: 3.4rem; height: 3.4rem; font-size: 1.9rem; }
         }
+
+        .hud-coins { position: absolute; top: 1.2rem; left: 50%; transform: translateX(-50%); padding: .3rem .9rem; border-radius: 999px; background: rgba(15,23,42,.62); color: #fde047; font-weight: 900; font-size: .95rem; border: 2px solid rgba(255,255,255,.5); box-shadow: 0 4px 10px rgba(2,6,23,.25); }
+        .coin-banner { position: absolute; top: 5.2rem; left: 0; right: 0; margin: 0 auto; width: max-content; padding: .6rem 1.5rem; border-radius: 1rem; background: rgba(255,251,235,.96); border: 2px solid #f59e0b; color: #92400e; font-weight: 900; font-size: 1.4rem; text-align: center; display: flex; flex-direction: column; align-items: center; box-shadow: 0 10px 25px rgba(0,0,0,.25); }
+        .coin-banner-sub { font-size: .8rem; color: #b45309; }
+        .shop-coins { font-weight: 900; font-size: .85rem; color: #fde047; background: rgba(15,23,42,.7); padding: .05rem .6rem; border-radius: 999px; }
+        .shop-screen { position: absolute; inset: 0; z-index: 30; display: none; align-items: center; justify-content: center; background: rgba(2,6,23,.55); padding: 16px; }
+        .shop-screen.show { display: flex; }
+        .shop-panel { width: 100%; max-width: 32rem; max-height: 92vh; overflow: auto; background: linear-gradient(180deg,#fff7ed,#fef3c7); border: 4px solid #fff; border-radius: 1.6rem; padding: 1rem 1.1rem 1.2rem; box-shadow: 0 24px 60px rgba(0,0,0,.4); color: #78350f; }
+        .shop-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: .8rem; }
+        .shop-head h2 { margin: 0; font-family: 'Jua','Nunito',sans-serif; font-size: 1.6rem; }
+        .coin-badge { background: #1e293b; color: #fde047; font-weight: 900; padding: .3rem .9rem; border-radius: 999px; font-size: 1rem; }
+        .shop-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr)); gap: .8rem; }
+        .skin-card { background: #fff; border-radius: 1.2rem; border: 3px solid #fde68a; padding: .6rem; display: flex; flex-direction: column; align-items: center; gap: .3rem; text-align: center; }
+        .skin-card.equipped { border-color: #22c55e; box-shadow: 0 0 0 3px rgba(34,197,94,.25); }
+        .skin-card.soon { opacity: .65; justify-content: center; min-height: 14rem; }
+        .skin-preview { width: 100%; max-width: 8.5rem; height: auto; background: linear-gradient(180deg,#bae6fd,#e0f2fe); border-radius: .9rem; }
+        .skin-name { font-family: 'Jua','Nunito',sans-serif; font-weight: 900; font-size: 1.05rem; }
+        .skin-desc { font-size: .72rem; font-weight: 700; color: #92400e; min-height: 2em; }
+        .skin-btn { width: 100%; padding: .5rem .6rem; border-radius: .9rem; border: 2px solid #fff; font-weight: 900; color: #fff; background: linear-gradient(135deg,#f59e0b,#ea580c); cursor: pointer; box-shadow: 0 4px 0 rgba(0,0,0,.2); }
+        .skin-btn.poor { background: linear-gradient(135deg,#9ca3af,#6b7280); }
+        .skin-btn.on { background: linear-gradient(135deg,#22c55e,#15803d); cursor: default; }
+        .shop-close { display: block; margin: 1rem auto 0; padding: .55rem 2rem; border-radius: 999px; border: 2px solid #fff; background: #1e293b; color: #fff; font-weight: 900; cursor: pointer; }
     </style>
 </head>
 <body class="w-screen h-screen flex justify-center items-center relative overflow-hidden select-none">
@@ -129,6 +151,7 @@
 
     <!-- UI 레이어 -->
     <div id="uiOverlay" class="absolute inset-0 pointer-events-none flex flex-col justify-between p-4 sm:p-6 z-10">
+        <div class="hud-coins">🪙 <span id="hudCoinNum">0</span></div>
         <!-- 상단 바: 점수, 최고 점수 -->
         <div class="flex justify-between items-start w-full max-w-md mx-auto">
             <div class="glass-panel px-4 py-2 rounded-2xl flex flex-col text-slate-800 shadow-lg">
@@ -207,7 +230,7 @@
             <p id="bgmStatus" class="menu-status">🎵 음악 불러오는 중…</p>
         </div>
 
-        <button id="shopBtn" class="shop-btn"><span class="shop-icon">🏪</span><span class="shop-label">상점</span></button>
+        <button id="shopBtn" class="shop-btn"><span class="shop-icon">🏪</span><span class="shop-label">상점</span><span class="shop-coins" id="menuCoins">🪙 0</span></button>
         <button id="helpBtn" class="help-btn">❓ 도움말</button>
 
         <div id="helpPanel" class="help-panel">
@@ -220,8 +243,17 @@
                 <p>• 🪶 <b>중력:</b> 낙하 속도를 완화해주는 아이템</p>
                 <p>• 👵 <b>할가스:</b> 희귀 슈퍼 모드 (일반 2% / 하드 1%) · 3.25배 가속 &amp; 무적</p>
                 <p style="color:#be123c">• 🦉 <b>하드 모드:</b> 붉은 부엉이 하늘, 아이템이 훨씬 적게 나와요</p>
+                <p style="color:#b45309">• 🪙 <b>코인:</b> 523m 돌파 시 일반 2코인 / 하드 5코인, 일반 2000m / 하드 1000m 돌파 시 10코인! 상점에서 스킨을 살 수 있어요</p>
                 <p style="color:#4338ca">• 🎵 모드를 선택하면 <b>배경음악이 자동으로 재생</b>됩니다!</p>
                 <p style="text-align:center;margin-top:.7rem;opacity:.7">(아무 곳이나 누르면 닫혀요)</p>
+            </div>
+        </div>
+
+        <div id="shopScreen" class="shop-screen">
+            <div class="shop-panel">
+                <div class="shop-head"><h2>🏪 상점</h2><div class="coin-badge">🪙 <span id="shopCoins">0</span></div></div>
+                <div id="shopList" class="shop-list"></div>
+                <button id="shopClose" class="shop-close">닫기</button>
             </div>
         </div>
 
@@ -246,6 +278,7 @@
             </div>
 
             <p id="newRecordMsg" class="hidden text-xs font-black text-emerald-700 animate-bounce">🎉 새로운 최고 기록 달성! 🎉</p>
+            <p id="coinEarnedMsg" style="display:none;font-weight:900;font-size:.9rem;color:#b45309;margin:0">🪙 이번 판에서 10코인을 얻었어요!</p>
 
             <button id="restartBtn" class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white font-black text-lg shadow-xl active:scale-95 transition-all cursor-pointer">
                 다시 도전하기
@@ -478,10 +511,16 @@
         });
 
         const MODES = {
-            normal: { name:'일반', itemCount:4, yBase:200, yRange:400, weights:{halgas:0.02, koala:0.30, slow:0.46, tofu:0.22}, storageKey:'skyDiverHighScore' },
-            hard:   { name:'하드', itemCount:2, yBase:600, yRange:1000, weights:{halgas:0.01, koala:0.18, slow:0.55, tofu:0.26}, storageKey:'skyDiverHighScoreHard' }
+            normal: { name:'일반', itemCount:4, yBase:200, yRange:400, weights:{halgas:0.02, koala:0.37, slow:0.37, tofu:0.24}, storageKey:'skyDiverHighScore', coinGoal:2000, bonusGoal:523, bonusReward:2 },
+            hard:   { name:'하드', itemCount:2, yBase:600, yRange:1000, weights:{halgas:0.01, koala:0.30, slow:0.39, tofu:0.30}, storageKey:'skyDiverHighScoreHard', coinGoal:1000, bonusGoal:523, bonusReward:5 }
         };
         let currentMode = 'normal';
+        function lsGet(k, d) { try { const v = localStorage.getItem(k); return v === null ? d : v; } catch (e) { return d; } }
+        function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+        let coins = parseInt(lsGet('skyDiverCoins', '0'), 10) || 0;
+        let ownedSkins = (() => { try { const a = JSON.parse(lsGet('skyDiverOwned', '["default"]')); return Array.isArray(a) && a.includes('default') ? a : ['default']; } catch (e) { return ['default']; } })();
+        let currentSkin = lsGet('skyDiverSkin', 'default'); if (!ownedSkins.includes(currentSkin)) currentSkin = 'default';
+        let coinAwarded = false, bonusAwarded = false, runCoins = 0;
         let highScore = localStorage.getItem(MODES.normal.storageKey) || 0;
         let baseSpeed = 4.2;
         let distance = 0;
@@ -811,6 +850,8 @@
                     drawWrinkledKoalaFace(ctx, 1.0, true, this.wobble);
                     ctx.beginPath(); ctx.arc(0, 8, this.radius+14, 0, Math.PI*2);
                     ctx.strokeStyle = 'rgba(16,185,129,0.7)'; ctx.lineWidth = 3; ctx.setLineDash([8,6]); ctx.stroke();
+                } else if (currentSkin === 'president') {
+                    drawPresidentSkin(ctx, this.wobble);
                 } else {
                     ctx.strokeStyle = 'rgba(255,255,255,0.7)'; ctx.lineWidth = 1.5;
                     for (let i = -2; i <= 2; i += 2) {
@@ -1057,6 +1098,140 @@
             ctx.restore();
         }
 
+        // 기본 다이버 스프라이트 (게임 속 일반 캐릭터와 동일, 상점 미리보기용)
+        function drawDefaultSprite(c, wobble) {
+            c.save();
+                    c.strokeStyle = 'rgba(255,255,255,0.7)'; c.lineWidth = 1.5;
+                    for (let i = -2; i <= 2; i += 2) {
+                        const lineOffset = (wobble * 30 + i * 15) % 60;
+                        c.beginPath(); c.moveTo(i*12, -30+lineOffset); c.lineTo(i*12, -10+lineOffset); c.stroke();
+                    }
+                    const flameScale = 1 + Math.sin(wobble*2)*0.15;
+                    c.save(); c.translate(0, 10);
+                    c.fillStyle = '#ef4444'; c.shadowColor = '#f97316'; c.shadowBlur = 20;
+                    c.beginPath(); c.moveTo(-22*flameScale,-5); c.quadraticCurveTo(0,45*flameScale,22*flameScale,-5); c.quadraticCurveTo(0,15,-22*flameScale,-5); c.fill();
+                    c.fillStyle = '#facc15';
+                    c.beginPath(); c.moveTo(-15*flameScale,-2); c.quadraticCurveTo(0,32*flameScale,15*flameScale,-2); c.quadraticCurveTo(0,10,-15*flameScale,-2); c.fill();
+                    c.fillStyle = '#ffffff';
+                    c.beginPath(); c.moveTo(-8*flameScale,0); c.quadraticCurveTo(0,20*flameScale,8*flameScale,0); c.fill();
+                    c.restore();
+                    c.fillStyle = '#1e293b';
+                    c.beginPath(); c.roundRect(-10,-28,8,14,4); c.roundRect(2,-28,8,14,4); c.fill();
+                    c.fillStyle = '#ef4444';
+                    c.beginPath(); c.arc(-6,-28,5,0,Math.PI*2); c.arc(6,-28,5,0,Math.PI*2); c.fill();
+                    c.fillStyle = '#38bdf8'; c.beginPath(); c.roundRect(-14,-18,28,20,8); c.fill();
+                    c.fillStyle = '#fed7aa';
+                    c.beginPath(); c.arc(-18,-8,5,0,Math.PI*2); c.arc(18,-8,5,0,Math.PI*2); c.fill();
+                    c.beginPath(); c.arc(0, 6, 16, 0, Math.PI*2);
+                    c.fillStyle = '#fed7aa'; c.fill(); c.strokeStyle = '#d97706'; c.lineWidth = 2; c.stroke();
+                    c.fillStyle = '#1e293b';
+                    c.beginPath(); c.arc(-5,8,3,0,Math.PI*2); c.arc(5,8,3,0,Math.PI*2); c.fill();
+                    c.fillStyle = '#f43f5e';
+                    c.beginPath(); c.arc(-8,12,2.5,0,Math.PI*2); c.arc(8,12,2.5,0,Math.PI*2); c.fill();
+                    c.beginPath(); c.arc(0,13,4,0,Math.PI*2); c.fillStyle = '#1e293b'; c.fill();
+            c.restore();
+        }
+
+        // 대통령 스킨 (특정 인물이 아닌 일반적인 '대통령' 스타일의 오리지널 캐릭터) - 기본 다이버와 같은 자세
+        function drawPresidentSkin(c, wobble) {
+            c.save();
+            c.strokeStyle = 'rgba(255,255,255,0.7)'; c.lineWidth = 1.5;
+            for (let i = -2; i <= 2; i += 2) {
+                const lineOffset = (wobble * 30 + i * 15) % 60;
+                c.beginPath(); c.moveTo(i * 12, -30 + lineOffset); c.lineTo(i * 12, -10 + lineOffset); c.stroke();
+            }
+            const flameScale = 1 + Math.sin(wobble * 2) * 0.15;
+            c.save(); c.translate(0, 10);
+            c.fillStyle = '#ef4444'; c.shadowColor = '#f97316'; c.shadowBlur = 20;
+            c.beginPath(); c.moveTo(-22 * flameScale, -5); c.quadraticCurveTo(0, 45 * flameScale, 22 * flameScale, -5); c.quadraticCurveTo(0, 15, -22 * flameScale, -5); c.fill();
+            c.fillStyle = '#facc15'; c.beginPath(); c.moveTo(-15 * flameScale, -2); c.quadraticCurveTo(0, 32 * flameScale, 15 * flameScale, -2); c.quadraticCurveTo(0, 10, -15 * flameScale, -2); c.fill();
+            c.fillStyle = '#ffffff'; c.beginPath(); c.moveTo(-8 * flameScale, 0); c.quadraticCurveTo(0, 20 * flameScale, 8 * flameScale, 0); c.fill();
+            c.restore();
+            // 다리 (정장 바지 + 구두)
+            c.fillStyle = '#0f172a'; c.beginPath(); c.roundRect(-10, -32, 8, 14, 4); c.roundRect(2, -32, 8, 14, 4); c.fill();
+            c.fillStyle = '#111827'; c.beginPath(); c.arc(-6, -32, 5, 0, Math.PI * 2); c.arc(6, -32, 5, 0, Math.PI * 2); c.fill();
+            // 몸통: 남색 정장 + 와이셔츠 + 초록 넥타이
+            c.fillStyle = '#1e3a8a'; c.beginPath(); c.roundRect(-14, -22, 28, 24, 8); c.fill();
+            c.fillStyle = '#ffffff'; c.beginPath(); c.moveTo(-6, -22); c.lineTo(0, -12.5); c.lineTo(6, -22); c.closePath(); c.fill();
+            c.fillStyle = '#16a34a'; c.strokeStyle = '#166534'; c.lineWidth = 0.8;
+            c.beginPath(); c.moveTo(-2.2, -22); c.lineTo(2.2, -22); c.lineTo(1.8, -19); c.lineTo(-1.8, -19); c.closePath(); c.fill();
+            c.beginPath(); c.moveTo(-1.8, -19); c.lineTo(1.8, -19); c.lineTo(3, -13.5); c.lineTo(0, -10.5); c.lineTo(-3, -13.5); c.closePath(); c.fill(); c.stroke();
+            // 손 / 귀 (기본 다이버와 같은 위치)
+            c.fillStyle = '#fed7aa'; c.beginPath(); c.arc(-18, -8, 5, 0, Math.PI * 2); c.arc(18, -8, 5, 0, Math.PI * 2); c.fill();
+            // 얼굴
+            c.beginPath(); c.arc(0, 6, 16, 0, Math.PI * 2); c.fillStyle = '#fed7aa'; c.fill(); c.strokeStyle = '#d97706'; c.lineWidth = 2; c.stroke();
+            // 은발 (얼굴 윗부분)
+            c.fillStyle = '#e5e7eb';
+            c.beginPath(); c.arc(0, 6, 16.8, Math.PI * 1.08, Math.PI * 1.92); c.quadraticCurveTo(6, -4, 0, -2.5); c.quadraticCurveTo(-6, -4, -16.3, 1.8); c.closePath(); c.fill();
+            // 안경 + 눈 + 볼 + 입 (기본 다이버와 같은 위치)
+            c.strokeStyle = '#f59e0b'; c.lineWidth = 1.5;
+            c.beginPath(); c.arc(-5, 8, 4.6, 0, Math.PI * 2); c.moveTo(9.6, 8); c.arc(5, 8, 4.6, 0, Math.PI * 2); c.moveTo(-0.4, 8); c.lineTo(0.4, 8); c.stroke();
+            c.fillStyle = '#1e293b'; c.beginPath(); c.arc(-5, 8, 2.4, 0, Math.PI * 2); c.arc(5, 8, 2.4, 0, Math.PI * 2); c.fill();
+            c.fillStyle = '#f43f5e'; c.beginPath(); c.arc(-9, 13, 2.2, 0, Math.PI * 2); c.arc(9, 13, 2.2, 0, Math.PI * 2); c.fill();
+            c.beginPath(); c.arc(0, 14, 3.4, 0, Math.PI * 2); c.fillStyle = '#1e293b'; c.fill();
+            c.restore();
+        }
+
+        // ===================== 상점 / 코인 =====================
+        const SKINS = [
+            { id: 'default', name: '기본 다이버', price: 0, desc: '지금까지 함께한 용감한 다이버' },
+            { id: 'president', name: '대통령 스킨', price: 100, desc: '정장을 차려입은 근엄한 지도자 스타일' }
+        ];
+        function saveShop() { lsSet('skyDiverCoins', String(coins)); lsSet('skyDiverOwned', JSON.stringify(ownedSkins)); lsSet('skyDiverSkin', currentSkin); }
+        function updateCoinUI() {
+            const a = document.getElementById('hudCoinNum'); if (a) a.textContent = coins;
+            const b = document.getElementById('shopCoins'); if (b) b.textContent = coins;
+            const d = document.getElementById('menuCoins'); if (d) d.textContent = '🪙 ' + coins;
+        }
+        function addCoins(n) { coins += n; saveShop(); updateCoinUI(); }
+        function showCoinBanner(n) {
+            const container = document.getElementById('milestoneContainer');
+            const b = document.createElement('div'); b.className = 'milestone-banner coin-banner';
+            b.innerHTML = '<span class="coin-banner-sub">🪙 코인 획득!</span><span>+' + n + ' 코인</span>';
+            container.appendChild(b); setTimeout(() => b.remove(), 3200);
+        }
+        let shopRunning = false, shopCards = [];
+        function renderShop() {
+            const list = document.getElementById('shopList'); list.innerHTML = ''; shopCards = [];
+            for (const s of SKINS) {
+                const owned = ownedSkins.includes(s.id), equipped = currentSkin === s.id;
+                const card = document.createElement('div'); card.className = 'skin-card' + (equipped ? ' equipped' : '');
+                const cv = document.createElement('canvas'); cv.width = 220; cv.height = 260; cv.className = 'skin-preview';
+                const nm = document.createElement('div'); nm.className = 'skin-name'; nm.textContent = s.name;
+                const ds = document.createElement('div'); ds.className = 'skin-desc'; ds.textContent = s.desc;
+                const btn = document.createElement('button'); btn.className = 'skin-btn';
+                if (equipped) { btn.textContent = '✅ 장착중'; btn.disabled = true; btn.classList.add('on'); }
+                else if (owned) { btn.textContent = '장착하기'; btn.onclick = () => equipSkin(s.id); }
+                else { btn.textContent = '🪙 ' + s.price + ' 구매'; if (coins < s.price) btn.classList.add('poor'); btn.onclick = () => buySkin(s.id); }
+                card.append(cv, nm, ds, btn); list.appendChild(card);
+                shopCards.push({ id: s.id, ctx: cv.getContext('2d') });
+            }
+            const soon = document.createElement('div'); soon.className = 'skin-card soon';
+            soon.innerHTML = '<div style="font-size:2.6rem">❓</div><div class="skin-name">새 스킨 준비 중</div><div class="skin-desc">곧 만나요!</div>';
+            list.appendChild(soon);
+            updateCoinUI();
+        }
+        function buySkin(id) {
+            const s = SKINS.find(x => x.id === id); if (!s || ownedSkins.includes(id)) return;
+            if (coins < s.price) { sounds.playHit(); menuToast('🪙 코인이 부족해요! (필요 ' + s.price + ' / 보유 ' + coins + ')'); return; }
+            coins -= s.price; ownedSkins.push(id); currentSkin = id; saveShop();
+            sounds.playMilestone(); menuToast('🎉 ' + s.name + ' 구매 완료! 바로 장착했어요'); renderShop();
+        }
+        function equipSkin(id) { currentSkin = id; saveShop(); sounds.playClick(); renderShop(); }
+        function shopFrame(now) {
+            if (!shopRunning) return;
+            const t = now / 1000;
+            for (const cd of shopCards) {
+                const c = cd.ctx; c.clearRect(0, 0, 220, 260);
+                c.save(); c.translate(110, 112 + Math.sin(t * 2.2) * 4); c.scale(2.3, 2.3);
+                if (cd.id === 'president') drawPresidentSkin(c, t * 9); else drawDefaultSprite(c, t * 9);
+                c.restore();
+            }
+            requestAnimationFrame(shopFrame);
+        }
+        function openShop() { renderShop(); document.getElementById('shopScreen').classList.add('show'); if (!shopRunning) { shopRunning = true; requestAnimationFrame(shopFrame); } }
+        function closeShop() { document.getElementById('shopScreen').classList.remove('show'); shopRunning = false; }
+
         let player = new Player();
         let clouds = Array.from({length:12}, ()=>new Cloud());
         let speedLines = Array.from({length:25}, ()=>new SpeedLine());
@@ -1066,7 +1241,7 @@
         let items = Array.from({length:4}, ()=>new Item());
 
         function resetGame() {
-            distance=0; achievedMilestones.clear();
+            distance=0; coinAwarded=false; bonusAwarded=false; runCoins=0; achievedMilestones.clear();
             document.getElementById('milestoneContainer').innerHTML='';
             player=new Player(); targetX=width/2;
             clouds.forEach(c=>c.reset(true));
@@ -1086,6 +1261,12 @@
             distance+=(baseSpeed*speedMultiplier)*0.08;
             if (distance<0) distance=0;
             checkMilestones(Math.floor(distance));
+            if (!bonusAwarded && distance >= MODES[currentMode].bonusGoal) {
+                bonusAwarded = true; const r = MODES[currentMode].bonusReward; runCoins += r; addCoins(r); showCoinBanner(r); sounds.playStar();
+            }
+            if (!coinAwarded && distance >= MODES[currentMode].coinGoal) {
+                coinAwarded = true; runCoins += 10; addCoins(10); showCoinBanner(10); sounds.playMilestone();
+            }
             document.getElementById('scoreText').innerText=`${Math.floor(distance)}m`;
             const buffContainer=document.getElementById('buffContainer');
             const shieldBadge=document.getElementById('shieldBadge');
@@ -1186,6 +1367,7 @@
             if (finalDist>highScore){highScore=finalDist;localStorage.setItem(MODES[currentMode].storageKey,highScore);document.getElementById('highScoreText').innerText=`${highScore}m`;isNewRecord=true;}
             document.getElementById('finalHighScore').innerText=`${highScore}m`;
             document.getElementById('newRecordMsg').style.display=isNewRecord?'block':'none';
+            const cem=document.getElementById('coinEarnedMsg'); cem.textContent='🪙 이번 판에서 '+runCoins+'코인을 얻었어요!'; cem.style.display=runCoins>0?'block':'none';
             document.getElementById('gameOverScreen').classList.remove('hidden');
         }
 
@@ -1291,7 +1473,8 @@
         }
 
         // 큰 스카이다이버 (불꽃 꼬리, 팔다리·표정 애니메이션)
-        function drawMenuDiver(c, t, trail = 1) {
+        function drawMenuDiver(c, t, trail = 1, skin = 'default') {
+            const P = skin === 'president';
             c.save(); c.lineCap = 'round'; c.lineJoin = 'round';
             // 대기권 돌파 불꽃: 머리 앞쪽에서 타오르며 몸 양옆을 따라 뒤로 길게 흐른다
             c.save();
@@ -1333,16 +1516,22 @@
             c.restore();
             // 다리
             const kick = Math.sin(t * 7) * 5;
-            c.strokeStyle = '#1d4ed8'; c.lineWidth = 8;
+            c.strokeStyle = P ? '#0f172a' : '#1d4ed8'; c.lineWidth = 8;
             c.beginPath(); c.moveTo(-6, 26); c.lineTo(-10 - kick * 0.4, 42 + kick); c.moveTo(6, 26); c.lineTo(10 + kick * 0.4, 42 - kick); c.stroke();
-            c.fillStyle = '#ef4444'; c.beginPath(); c.arc(-10 - kick * 0.4, 44 + kick, 5.5, 0, Math.PI * 2); c.arc(10 + kick * 0.4, 44 - kick, 5.5, 0, Math.PI * 2); c.fill();
+            c.fillStyle = P ? '#111827' : '#ef4444'; c.beginPath(); c.arc(-10 - kick * 0.4, 44 + kick, 5.5, 0, Math.PI * 2); c.arc(10 + kick * 0.4, 44 - kick, 5.5, 0, Math.PI * 2); c.fill();
             // 몸통
-            c.fillStyle = '#38bdf8'; c.beginPath(); c.roundRect(-12, 6, 24, 26, 9); c.fill();
-            c.fillStyle = '#ffffff'; c.beginPath(); c.roundRect(-12, 17, 24, 4, 2); c.fill();
-            c.fillStyle = '#facc15'; c.beginPath(); c.arc(0, 12, 3, 0, Math.PI * 2); c.fill();
+            c.fillStyle = P ? '#1e3a8a' : '#38bdf8'; c.beginPath(); c.roundRect(-12, 6, 24, 26, 9); c.fill();
+            if (P) {
+                c.fillStyle = '#ffffff'; c.beginPath(); c.moveTo(-6, 6); c.lineTo(0, 17); c.lineTo(6, 6); c.closePath(); c.fill();
+                c.fillStyle = '#16a34a'; c.beginPath(); c.moveTo(-2.2, 9); c.lineTo(2.2, 9); c.lineTo(3.2, 22); c.lineTo(0, 26); c.lineTo(-3.2, 22); c.closePath(); c.fill();
+                c.fillStyle = '#facc15'; c.beginPath(); c.arc(-7.5, 20, 2.3, 0, Math.PI * 2); c.fill();
+            } else {
+                c.fillStyle = '#ffffff'; c.beginPath(); c.roundRect(-12, 17, 24, 4, 2); c.fill();
+                c.fillStyle = '#facc15'; c.beginPath(); c.arc(0, 12, 3, 0, Math.PI * 2); c.fill();
+            }
             // 팔
             const flap = Math.sin(t * 6) * 8;
-            c.strokeStyle = '#38bdf8'; c.lineWidth = 8;
+            c.strokeStyle = P ? '#1e3a8a' : '#38bdf8'; c.lineWidth = 8;
             c.beginPath(); c.moveTo(-11, 12); c.lineTo(-31, 3 + flap); c.moveTo(11, 12); c.lineTo(31, 3 - flap); c.stroke();
             c.fillStyle = '#fed7aa'; c.beginPath(); c.arc(-32, 3 + flap, 5.5, 0, Math.PI * 2); c.arc(32, 3 - flap, 5.5, 0, Math.PI * 2); c.fill();
             // 머리
@@ -1350,7 +1539,7 @@
             c.beginPath(); c.arc(0, -10, 19, 0, Math.PI * 2); c.fill(); c.stroke();
             c.fillStyle = '#fed7aa'; c.beginPath(); c.arc(-20, -10, 5, 0, Math.PI * 2); c.arc(20, -10, 5, 0, Math.PI * 2); c.fill();
             // 머리카락 (헬멧 없음)
-            c.fillStyle = '#7c2d12';
+            c.fillStyle = P ? '#e5e7eb' : '#7c2d12';
             c.beginPath(); c.arc(0, -10, 19.5, Math.PI * 1.06, Math.PI * 1.94); c.quadraticCurveTo(10, -22, 0, -19); c.quadraticCurveTo(-10, -22, -18.5, -16.5); c.closePath(); c.fill();
             const hs = Math.sin(t * 9) * 2;
             c.beginPath(); c.moveTo(-9, -27); c.quadraticCurveTo(-15 - hs, -24, -19, -18); c.quadraticCurveTo(-13, -23, -9, -27); c.fill();
@@ -1365,6 +1554,7 @@
                 c.fillStyle = '#ffffff'; c.beginPath(); c.arc(-5, -9.2, 1.2, 0, Math.PI * 2); c.arc(7, -9.2, 1.2, 0, Math.PI * 2); c.fill();
             }
             c.fillStyle = 'rgba(244,63,94,0.75)'; c.beginPath(); c.arc(-11, -2, 3.2, 0, Math.PI * 2); c.arc(11, -2, 3.2, 0, Math.PI * 2); c.fill();
+            if (P) { c.strokeStyle = '#f59e0b'; c.lineWidth = 1.6; c.beginPath(); c.arc(-6, -8, 5.6, 0, Math.PI * 2); c.moveTo(11.6, -8); c.arc(6, -8, 5.6, 0, Math.PI * 2); c.moveTo(-0.4, -8); c.lineTo(0.4, -8); c.stroke(); }
             c.fillStyle = '#1e293b'; c.beginPath(); c.ellipse(0, 2.5, 4.4, 2.6 + (Math.sin(t * 8) + 1) * 1.5, 0, 0, Math.PI * 2); c.fill();
             c.restore();
         }
@@ -1458,7 +1648,7 @@
                            : { dv: [0.45, 0.38, 0.0046], ko: [0.80, 0.24, 0.0034], gr: [0.76, 0.53, 0.0038] };
             c.save(); c.translate(L.ko[0] * W + Math.sin(t * 0.9) * m * 0.02, L.ko[1] * H + Math.sin(t * 1.7) * m * 0.015); c.scale(L.ko[2] * m, L.ko[2] * m); drawMenuKoala(c, t); c.restore();
             c.save(); c.translate(L.gr[0] * W + Math.sin(t * 0.7 + 2) * m * 0.02, L.gr[1] * H + Math.sin(t * 1.4 + 1) * m * 0.018); c.scale(L.gr[2] * m, L.gr[2] * m); drawMenuGrandma(c, t); c.restore();
-            c.save(); c.translate(L.dv[0] * W + Math.sin(t * 1.3) * m * 0.008, L.dv[1] * H + Math.sin(t * 1.9) * m * 0.012); c.rotate(Math.PI * 1.25 + Math.sin(t * 1.5) * 0.06); c.scale(L.dv[2] * m, L.dv[2] * m); drawMenuDiver(c, t, 0.8); c.restore();
+            c.save(); c.translate(L.dv[0] * W + Math.sin(t * 1.3) * m * 0.008, L.dv[1] * H + Math.sin(t * 1.9) * m * 0.012); c.rotate(Math.PI * 1.25 + Math.sin(t * 1.5) * 0.06); c.scale(L.dv[2] * m, L.dv[2] * m); drawMenuDiver(c, t, 0.8, currentSkin); c.restore();
             // 앞쪽 구름층
             for (let i = 0; i < 9; i++) {
                 const bx = ((i * W / 6 + t * 14) % (W + 300)) - 150, r = m * (0.09 + 0.03 * ((i * 7) % 3));
@@ -1486,14 +1676,16 @@
             window.addEventListener('resize', menuResize);
             new MutationObserver(() => { menuEl.classList.contains('hidden') ? menuStop() : menuStart(); }).observe(menuEl, { attributes: true, attributeFilter: ['class'] });
             document.getElementById('bossBtn').addEventListener('click', () => { sounds.playClick(); menuToast('🔥 보스전은 아직 출시 전이에요!'); });
-            document.getElementById('shopBtn').addEventListener('click', () => { sounds.playClick(); menuToast('🏪 상점은 곧 열려요!'); });
+            document.getElementById('shopBtn').addEventListener('click', () => { sounds.playClick(); openShop(); });
+            document.getElementById('shopClose').addEventListener('click', () => { sounds.playClick(); closeShop(); });
+            document.getElementById('shopScreen').addEventListener('click', (e) => { if (e.target.id === 'shopScreen') closeShop(); });
             const helpPanel = document.getElementById('helpPanel');
             document.getElementById('helpBtn').addEventListener('click', () => { sounds.playClick(); helpPanel.classList.add('show'); });
             helpPanel.addEventListener('click', () => helpPanel.classList.remove('show'));
             if (!menuEl.classList.contains('hidden')) menuStart();
         }
 
-        window.onload=function(){initMenu();sounds.loadBGM();gameLoop();};
+        window.onload=function(){updateCoinUI();initMenu();sounds.loadBGM();gameLoop();};
     </script>
 </body>
 </html>

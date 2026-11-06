@@ -140,6 +140,19 @@
         .skin-btn.poor { background: linear-gradient(135deg,#9ca3af,#6b7280); }
         .skin-btn.on { background: linear-gradient(135deg,#22c55e,#15803d); cursor: default; }
         .shop-close { display: block; margin: 1rem auto 0; padding: .55rem 2rem; border-radius: 999px; border: 2px solid #fff; background: #1e293b; color: #fff; font-weight: 900; cursor: pointer; }
+
+        .shop-hint { display: none; font-size: .8rem; font-weight: 800; color: #b45309; }
+        @media (min-aspect-ratio: 21/20) {
+            .shop-screen { padding: 0; align-items: stretch; justify-content: stretch; background: linear-gradient(180deg,#fff7ed,#fef3c7); }
+            .shop-panel { box-sizing: border-box; max-width: none; max-height: none; height: 100%; border: 0; border-radius: 0; box-shadow: none; display: flex; flex-direction: column; overflow: hidden; padding: .9rem 1.3rem 1rem; }
+            .shop-head { flex: 0 0 auto; gap: 1rem; padding-right: 6.5rem; margin-bottom: .6rem; }
+            .shop-hint { display: block; margin-right: auto; margin-left: .4rem; }
+            .shop-list { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: row; gap: 1rem; overflow-x: auto; overflow-y: auto; padding: .2rem .2rem .8rem; scroll-snap-type: x proximity; }
+            .skin-card { flex: 0 0 clamp(12rem, 30vw, 18rem); scroll-snap-align: start; }
+            .skin-preview { flex: 1 1 0; min-height: 0; max-width: none; width: 100%; height: auto; max-height: none; object-fit: contain; }
+            .shop-close { position: absolute; top: .9rem; right: 1.3rem; margin: 0; padding: .45rem 1.4rem; }
+            .shop-panel .shop-list, .shop-panel .shop-list * { touch-action: pan-x pan-y; }
+        }
     </style>
 </head>
 <body class="w-screen h-screen flex justify-center items-center relative overflow-hidden select-none">
@@ -246,6 +259,7 @@
                 <p>• 🪶 <b>중력:</b> 낙하 속도를 완화해주는 아이템</p>
                 <p>• 👵 <b>할가스:</b> 희귀 슈퍼 모드 (일반 2% / 하드 1%) · 3.25배 가속 &amp; 무적</p>
                 <p style="color:#be123c">• 🦉 <b>하드 모드:</b> 붉은 부엉이 하늘, 아이템이 훨씬 적게 나와요</p>
+                <p style="color:#b45309">• 👔 <b>스킨 특성:</b> 대통령 스킨은 로켓에 맞으면 아래로 돌진 후 폭발+무적, DJ는 시작 시 할가스 발동 + 두부 1개당 +2코인</p>
                 <p style="color:#b45309">• 🪙 <b>코인:</b> 523m씩 내려갈 때마다 일반 4코인 / 하드 6코인! 상점에서 스킨을 살 수 있어요</p>
                 <p style="color:#4338ca">• 🎵 모드를 선택하면 <b>배경음악이 자동으로 재생</b>됩니다!</p>
                 <p style="text-align:center;margin-top:.7rem;opacity:.7">(아무 곳이나 누르면 닫혀요)</p>
@@ -254,7 +268,7 @@
 
         <div id="shopScreen" class="shop-screen">
             <div class="shop-panel">
-                <div class="shop-head"><h2>🏪 상점</h2><div class="coin-badge">🪙 <span id="shopCoins">0</span></div></div>
+                <div class="shop-head"><h2>🏪 상점</h2><span class="shop-hint">↔ 옆으로 밀어서 보기</span><div class="coin-badge">🪙 <span id="shopCoins">0</span></div></div>
                 <div id="shopList" class="shop-list"></div>
                 <button id="shopClose" class="shop-close">닫기</button>
             </div>
@@ -1016,6 +1030,7 @@
         }
 
         let particles = [];
+        let floatTexts = [];
         function createExplosion(x, y, color='#f97316', count=20) {
             for (let i=0;i<count;i++) {
                 const angle=Math.random()*Math.PI*2, speed=Math.random()*8+2;
@@ -1258,6 +1273,22 @@
             c.fillStyle = '#facc15'; c.beginPath(); c.arc(-9, -13, 1.9, 0, Math.PI * 2); c.fill();
             // 손 / 귀
             c.fillStyle = '#fed7aa'; c.beginPath(); c.arc(-18, -8, 5, 0, Math.PI * 2); c.arc(18, -8, 5, 0, Math.PI * 2); c.fill();
+            // 대기권 돌파 이펙트 (머리 앞쪽: 열 후광 + 충격파 + 불씨)
+            const tw = wobble / 9;
+            const hg = c.createRadialGradient(0, 24, 3, 0, 24, 42);
+            hg.addColorStop(0, 'rgba(255,250,220,0.95)'); hg.addColorStop(0.4, 'rgba(253,186,116,0.65)'); hg.addColorStop(1, 'rgba(239,68,68,0)');
+            c.fillStyle = hg; c.beginPath(); c.arc(0, 24, 42, 0, Math.PI * 2); c.fill();
+            c.save(); c.lineCap = 'round'; c.shadowColor = '#fb923c'; c.shadowBlur = 14;
+            c.strokeStyle = 'rgba(255,237,213,0.95)'; c.lineWidth = 2.6; c.beginPath(); c.arc(0, 6, 25 + Math.sin(tw * 8) * 1.5, Math.PI * 0.12, Math.PI * 0.88); c.stroke();
+            c.strokeStyle = 'rgba(251,146,60,0.85)'; c.lineWidth = 2; c.beginPath(); c.arc(0, 6, 32 + Math.sin(tw * 8 + 1) * 1.5, Math.PI * 0.2, Math.PI * 0.8); c.stroke();
+            c.strokeStyle = 'rgba(244,114,182,0.75)'; c.lineWidth = 1.6; c.beginPath(); c.arc(0, 6, 39 + Math.sin(tw * 8 + 2) * 1.5, Math.PI * 0.27, Math.PI * 0.73); c.stroke();
+            c.restore();
+            for (let k = 0; k < 10; k++) {
+                const ph = (tw * 1.4 + k * 0.1) % 1, ey = 28 - ph * 72, ex = (k % 2 ? 1 : -1) * (12 + (k % 5) * 4) + Math.sin(tw * 5 + k) * 3;
+                c.globalAlpha = 1 - ph; c.fillStyle = 'hsl(' + ((tw * 200 + k * 36) % 360) + ',100%,65%)';
+                c.beginPath(); c.arc(ex, ey, 1.4 + (k % 3) * 0.7, 0, Math.PI * 2); c.fill();
+            }
+            c.globalAlpha = 1;
             // 얼굴 (기본 다이버와 같은 귀여운 얼굴)
             c.beginPath(); c.arc(0, 6, 16, 0, Math.PI * 2); c.fillStyle = '#fed7aa'; c.fill(); c.strokeStyle = '#d97706'; c.lineWidth = 2; c.stroke();
             // 짙은 갈색 머리 (위로 넘긴 스타일)
@@ -1273,8 +1304,8 @@
         // ===================== 상점 / 코인 =====================
         const SKINS = [
             { id: 'default', name: '기본 다이버', price: 0, desc: '지금까지 함께한 용감한 다이버' },
-            { id: 'president', name: '대통령 스킨', price: 70, desc: '정장을 차려입은 근엄한 지도자 스타일' },
-            { id: 'vip', name: 'DJ', price: 325, desc: '줄무늬 정장 · 보라 넥타이 · 반짝이는 황금빛' }
+            { id: 'president', name: '대통령 스킨', price: 70, desc: '특성: 로켓에 맞으면 아래로 52.3m 돌진! 끝나면 폭발과 함께 잠깐 무적' },
+            { id: 'vip', name: 'DJ', price: 325, desc: '특성: 시작하자마자 할가스 발동 · 두부를 먹을 때마다 +2코인' }
         ];
         function saveShop() { lsSet('skyDiverCoins', String(coins)); lsSet('skyDiverOwned', JSON.stringify(ownedSkins)); lsSet('skyDiverSkin', currentSkin); }
         function updateCoinUI() {
@@ -1323,7 +1354,7 @@
             const t = now / 1000;
             for (const cd of shopCards) {
                 const c = cd.ctx; c.clearRect(0, 0, 220, 260);
-                const vip = cd.id === 'vip'; c.save(); c.translate(110, (vip ? 178 : 112) + Math.sin(t * 2.2) * 4); c.scale(vip ? 1.75 : 2.3, vip ? 1.75 : 2.3);
+                const vip = cd.id === 'vip'; c.save(); c.translate(110, (vip ? 192 : 112) + Math.sin(t * 2.2) * 4); c.scale(vip ? 1.45 : 2.3, vip ? 1.45 : 2.3);
                 if (cd.id === 'vip') drawVipSkin(c, t * 9); else if (cd.id === 'president') drawPresidentSkin(c, t * 9); else drawDefaultSprite(c, t * 9);
                 c.restore();
             }
@@ -1344,23 +1375,28 @@
             distance=0; coinAwarded=false; bonusNext=MODES[currentMode].bonusGoal; runCoins=0; achievedMilestones.clear();
             document.getElementById('milestoneContainer').innerHTML='';
             player=new Player(); targetX=width/2;
+            if (currentSkin==='vip') player.halgasTimer=320;
             clouds.forEach(c=>c.reset(true));
             backgroundKoalas.forEach(bk=>bk.reset(true));
             owls.forEach(o=>o.reset(true));
             obstacles.forEach(o=>o.reset());
             items = Array.from({length: MODES[currentMode].itemCount}, ()=>new Item());
-            particles=[]; sounds.startBGM();
+            particles=[]; floatTexts=[]; sounds.startBGM();
         }
 
         function update() {
             if (gameState!==STATE.PLAYING) return;
             let speedMultiplier=1.0;
             if (player.hitRocketTimer>0) speedMultiplier=-3.5;
+            else if (player.dashTarget>0) speedMultiplier=3.5;
             else if (player.halgasTimer>0) speedMultiplier=3.25;
             else if (player.slowTimer>0) speedMultiplier=0.45;
             distance+=(baseSpeed*speedMultiplier)*0.08;
             if (distance<0) distance=0;
             checkMilestones(Math.floor(distance));
+            if (player.dashTarget > 0 && distance >= player.dashTarget) {
+                player.dashTarget = 0; player.postHalgasShieldTimer = Math.round(60 * 1.7); triggerHalgasBlast(player.x, player.y);
+            }
             while (distance >= bonusNext) {
                 const r = MODES[currentMode].bonusReward; runCoins += r; addCoins(r); showCoinBanner(r); sounds.playStar();
                 bonusNext += MODES[currentMode].bonusGoal;
@@ -1376,18 +1412,20 @@
             if (player.slowTimer>0){slowBadge.classList.remove('hidden');hasBuff=true;}else slowBadge.classList.add('hidden');
             buffContainer.style.opacity=hasBuff?'1':'0';
             player.update();
+            if (player.dashTarget > 0) for (let k = 0; k < 6; k++) player.flameParticles.push({ x: player.x + (Math.random() - 0.5) * 30, y: player.y - 10 - Math.random() * 10, vx: (Math.random() - 0.5) * 4, vy: -(Math.random() * 14 + 8), size: Math.random() * 8 + 5, color: ['#fde047', '#ffffff', '#fb923c'][Math.floor(Math.random() * 3)], life: 1.0 });
             clouds.forEach(c=>c.update(speedMultiplier));
             if (currentMode==='hard') owls.forEach(o=>o.update(speedMultiplier));
             if (player.halgasTimer>0){speedLines.forEach(sl=>sl.update());backgroundKoalas.forEach(bk=>bk.update(speedMultiplier));}
             obstacles.forEach(o=>o.update(speedMultiplier));
             items.forEach(i=>i.update(speedMultiplier));
-            if (player.hitRocketTimer<=0&&player.postHalgasShieldTimer<=0) {
+            if (player.hitRocketTimer<=0&&player.postHalgasShieldTimer<=0&&!(player.dashTarget>0)) {
                 for (let obs of obstacles) {
                     const dx=player.x-obs.x, dy=player.y-obs.y;
                     const dist=Math.sqrt(dx*dx+dy*dy);
                     if (dist<player.radius+obs.size*0.75) {
                         if (player.halgasTimer>0){createExplosion(obs.x,obs.y,'#ec4899',20);sounds.playStar();obs.reset();}
                         else if (player.shield){player.shield=false;createExplosion(obs.x,obs.y,'#10b981',25);sounds.playExplosion();obs.reset();}
+                        else if (obs.type==='rocket'&&currentSkin==='president'){sounds.playHit();player.dashTarget=distance+52.3;createExplosion(obs.x,obs.y,'#f97316',25);floatTexts.push({x:player.x,y:player.y-40,t:'⬇ 돌진!',life:1});obs.reset();break;}
                         else if (obs.type==='rocket'){sounds.playHit();distance=Math.max(0,distance-52.3);player.hitRocketTimer=65;player.hitRocketX=obs.x;player.hitRocketY=player.y;createExplosion(obs.x,obs.y,'#f97316',25);obs.reset();break;}
                         else{createExplosion(player.x,player.y,'#ef4444',35);sounds.playExplosion();gameOver();return;}
                     }
@@ -1398,7 +1436,7 @@
                     const dx=player.x-item.x, dy=player.y-item.y;
                     const dist=Math.sqrt(dx*dx+dy*dy);
                     if (dist<player.radius+item.size) {
-                        if (item.type==='tofu'){distance+=100;sounds.playStar();createExplosion(item.x,item.y,'#60a5fa',12);}
+                        if (item.type==='tofu'){distance+=100;sounds.playStar();createExplosion(item.x,item.y,'#60a5fa',12); if (currentSkin==='vip') { runCoins+=2; addCoins(2); floatTexts.push({x:item.x,y:item.y-20,t:'+2 🪙',life:1}); }}
                         else if (item.type==='koala'){player.shield=true;sounds.playPowerup();createExplosion(item.x,item.y,'#10b981',15);}
                         else if (item.type==='slow'){player.slowTimer=300;sounds.playPowerup();createExplosion(item.x,item.y,'#818cf8',15);}
                         else if (item.type==='halgas'){player.halgasTimer=320;sounds.playPowerup();createExplosion(item.x,item.y,'#ec4899',25);}
@@ -1407,6 +1445,7 @@
                 }
             }
             for (let i=particles.length-1;i>=0;i--){const p=particles[i];p.x+=p.vx;p.y+=p.vy;p.life-=0.03;if(p.life<=0)particles.splice(i,1);}
+            for (let i=floatTexts.length-1;i>=0;i--){const f=floatTexts[i];f.y-=1.1;f.life-=0.018;if(f.life<=0)floatTexts.splice(i,1);}
         }
 
         function drawRainbowFireworks() {
@@ -1455,7 +1494,14 @@
             }
         }
 
-        function gameLoop() { update(); render(); requestAnimationFrame(gameLoop); }
+        function drawFloatTexts() {
+            for (const f of floatTexts) {
+                ctx.save(); ctx.globalAlpha = Math.max(0, f.life); ctx.font = "900 22px 'Jua','Nunito',sans-serif"; ctx.textAlign = 'center';
+                ctx.lineWidth = 4; ctx.strokeStyle = 'rgba(15,23,42,0.85)'; ctx.strokeText(f.t, f.x, f.y);
+                ctx.fillStyle = '#fde047'; ctx.fillText(f.t, f.x, f.y); ctx.restore();
+            }
+        }
+        function gameLoop() { update(); render(); drawFloatTexts(); requestAnimationFrame(gameLoop); }
 
         function gameOver() {
             gameState=STATE.GAMEOVER; sounds.stopBGM();
@@ -1779,6 +1825,11 @@
             document.getElementById('shopBtn').addEventListener('click', () => { sounds.playClick(); openShop(); });
             document.getElementById('shopClose').addEventListener('click', () => { sounds.playClick(); closeShop(); });
             document.getElementById('shopScreen').addEventListener('click', (e) => { if (e.target.id === 'shopScreen') closeShop(); });
+            document.getElementById('shopList').addEventListener('wheel', (e) => {
+                if (!window.matchMedia('(min-aspect-ratio: 21/20)').matches) return;
+                const l = e.currentTarget; if (l.scrollWidth <= l.clientWidth) return;
+                e.preventDefault(); l.scrollLeft += (Math.abs(e.deltaY) > Math.abs(e.deltaX) ? e.deltaY : e.deltaX);
+            }, { passive: false });
             const helpPanel = document.getElementById('helpPanel');
             document.getElementById('helpBtn').addEventListener('click', () => { sounds.playClick(); helpPanel.classList.add('show'); });
             helpPanel.addEventListener('click', () => helpPanel.classList.remove('show'));

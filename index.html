@@ -160,6 +160,13 @@
         .coupon-input:focus { border-color: #f59e0b; box-shadow: 0 0 0 3px rgba(245,158,11,.25); }
         .coupon-btn { padding: .45rem 1rem; border-radius: 999px; border: 2px solid #fff; background: linear-gradient(135deg,#f59e0b,#ea580c); color: #fff; font-weight: 900; cursor: pointer; box-shadow: 0 3px 0 rgba(0,0,0,.2); }
         @media (min-aspect-ratio: 21/20) { .coupon-row { flex: 0 0 auto; margin-bottom: .5rem; } }
+
+        .hud-lives { position: absolute; top: 3.7rem; left: 50%; transform: translateX(-50%); font-size: 1.15rem; letter-spacing: .12em; text-shadow: 0 2px 4px rgba(2,6,23,.45); }
+        .vert-pad { position: absolute; left: 50%; bottom: 1.5rem; transform: translateX(-50%); display: none; gap: .8rem; z-index: 20; pointer-events: auto; }
+        .vert-pad.show { display: flex; }
+        .vbtn { width: 4.2rem; height: 4.2rem; border-radius: 50%; border: 2px solid rgba(255,255,255,.7); background: rgba(255,255,255,.4); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); font-size: 1.6rem; color: #0c4a6e; box-shadow: 0 8px 20px rgba(31,38,135,.2); cursor: pointer; }
+        .vbtn:active { transform: scale(.94); background: rgba(255,255,255,.7); }
+        @media (min-width: 640px) { .vert-pad { display: none !important; } }
     </style>
 </head>
 <body class="w-screen h-screen flex justify-center items-center relative overflow-hidden select-none">
@@ -176,6 +183,7 @@
     <!-- UI 레이어 -->
     <div id="uiOverlay" class="absolute inset-0 pointer-events-none flex flex-col justify-between p-4 sm:p-6 z-10">
         <div class="hud-coins">🪙 <span id="hudCoinNum">0</span></div>
+        <div id="hudLives" class="hud-lives" style="display:none"></div>
         <!-- 상단 바: 점수, 최고 점수 -->
         <div class="flex justify-between items-start w-full max-w-md mx-auto">
             <div class="glass-panel px-4 py-2 rounded-2xl flex flex-col text-slate-800 shadow-lg">
@@ -226,6 +234,8 @@
         </button>
     </div>
 
+    <div id="vertPad" class="vert-pad"><button id="virtualUp" class="vbtn">▲</button><button id="virtualDown" class="vbtn">▼</button></div>
+
     <!-- 시작 화면 -->
     <div id="startScreen">
         <canvas id="menuCanvas"></canvas>
@@ -267,7 +277,7 @@
                 <p>• 🪶 <b>중력:</b> 낙하 속도를 완화해주는 아이템</p>
                 <p>• 👵 <b>할가스:</b> 희귀 슈퍼 모드 (일반 2% / 하드 1%) · 3.25배 가속 &amp; 무적</p>
                 <p style="color:#be123c">• 🦉 <b>하드 모드:</b> 붉은 부엉이 하늘, 아이템이 훨씬 적게 나와요</p>
-                <p style="color:#b45309">• 👔 <b>스킨 특성:</b> 대통령 스킨은 로켓에 맞으면 아래로 돌진 후 폭발+무적, DJ는 시작 시 할가스 발동 + 두부 1개당 +2코인, 아따맘마는 코알라를 먹으면 노따맘마로 변신해 방어 2회 + 할가스 +1초, 중력은 노따맘마 방패 회복(방패가 없거나 가득이면 효과 없음)</p>
+                <p style="color:#b45309">• 👔 <b>스킨 특성:</b> 대통령 스킨은 로켓에 맞으면 아래로 돌진 후 폭발+무적, DJ는 시작 시 할가스 발동 + 두부 1개당 +2코인, 아따맘마는 코알라를 먹으면 노따맘마로 변신해 방어 2회 + 할가스 +1초, 중력은 노따맘마 방패 회복(방패가 없거나 가득이면 효과 없음), MC는 상하좌우로 움직일 수 있고 목숨이 3개</p>
                 <p style="color:#b45309">• 🪙 <b>코인:</b> 523m씩 내려갈 때마다 일반 4코인 / 하드 6코인! 상점에서 스킨을 살 수 있어요</p>
                 <p style="color:#4338ca">• 🎵 모드를 선택하면 <b>배경음악이 자동으로 재생</b>됩니다!</p>
                 <p style="text-align:center;margin-top:.7rem;opacity:.7">(아무 곳이나 누르면 닫혀요)</p>
@@ -533,7 +543,7 @@
         window.addEventListener('resize', () => {
             width = canvas.width = window.innerWidth;
             height = canvas.height = window.innerHeight;
-            if (player) player.y = height * 0.35;
+            if (player) { player.y = height * 0.35; targetY = player.y; }
         });
 
         const MODES = {
@@ -552,7 +562,9 @@
         let distance = 0;
         let keyLeft = false;
         let keyRight = false;
+        let keyUp = false, keyDown = false;
         let targetX = width / 2;
+        let targetY = height * 0.35;
 
         document.getElementById('highScoreText').innerText = `${Math.floor(highScore)}m`;
 
@@ -780,7 +792,7 @@
                         color: ['#f97316', '#ef4444', '#facc15'][Math.floor(Math.random() * 3)],
                         life: 1.0
                     });
-                    if (this.hitRocketTimer <= 0) { this.y = height * 0.35; targetX = this.x; }
+                    if (this.hitRocketTimer <= 0) { this.y = (currentSkin === 'mc' ? targetY : height * 0.35); targetX = this.x; }
                     for (let i = this.flameParticles.length - 1; i >= 0; i--) {
                         const p = this.flameParticles[i];
                         p.x += p.vx; p.y += p.vy; p.size *= 0.88; p.life -= 0.08;
@@ -792,6 +804,12 @@
                 if (keyRight) targetX += 12;
                 targetX = Math.max(this.radius + 10, Math.min(width - this.radius - 10, targetX));
                 this.x += (targetX - this.x) * 0.2;
+                if (currentSkin === 'mc') {
+                    if (keyUp) targetY -= 12;
+                    if (keyDown) targetY += 12;
+                    targetY = Math.max(height * 0.14, Math.min(height * 0.86, targetY));
+                    this.y += (targetY - this.y) * 0.2;
+                }
                 this.wobble += 0.15;
                 if (this.slowTimer > 0) this.slowTimer--;
                 if (this.halgasTimer > 0) { this.wasHalgasActive = true; this.halgasTimer--; }
@@ -883,6 +901,7 @@
                     ctx.beginPath(); ctx.arc(0, 8, this.radius+14, 0, Math.PI*2);
                     ctx.strokeStyle = 'rgba(16,185,129,0.7)'; ctx.lineWidth = 3; ctx.setLineDash([8,6]); ctx.stroke();
                 } else if (currentSkin === 'mc') {
+                    if (this.postHalgasShieldTimer > 0 && Math.floor(this.postHalgasShieldTimer / 4) % 2 === 0) ctx.globalAlpha = 0.45;
                     drawMcSkin(ctx, this.wobble);
                 } else if (currentSkin === 'mom') {
                     drawMomSkin(ctx, this.wobble, false, 0);
@@ -1429,7 +1448,7 @@
             c.restore();
             // 2) 양쪽 로켓의 부스터 (흰색이 섞인 멋있는 불꽃)
             for (const s of [-1, 1]) {
-                c.save(); c.translate(s * 17.9, -17); c.scale(1, -1); c.shadowColor = '#bfe9ff'; c.shadowBlur = 10;
+                c.save(); c.translate(s * 17.9, -14.8); c.scale(1, -1); c.shadowColor = '#bfe9ff'; c.shadowBlur = 10;
                 for (let i = 0; i < 3; i++) {
                     const ox = (i - 1) * 1.8, len = 14 + (i === 1 ? 7 : 0) + Math.sin(tt * 14 + s * 1.7 + i * 2) * 3.5, w = i === 1 ? 2.3 : 1.6;
                     const g = c.createLinearGradient(0, 0, 0, len);
@@ -1452,7 +1471,7 @@
             c.fillStyle = SKINC; c.strokeStyle = OUT; c.lineWidth = 0.9;
             for (const s of [-1, 1]) {
                 c.beginPath(); c.moveTo(s * 19.2 - 3.1, -2.4); c.lineTo(s * 19.2 + 3.1, -2.4); c.lineTo(s * 19.2, 0.9); c.closePath(); c.fill(); c.stroke();
-                c.beginPath(); c.arc(s * 17.9, -14.4, 2.9, 0, Math.PI * 2); c.fill(); c.stroke();
+                c.fillStyle = '#cbd5e1'; for (const dx of [-3.3, 3.3]) { c.beginPath(); c.arc(s * 17.9 + dx, -14.6, 2.3, 0, Math.PI * 2); c.fill(); c.stroke(); } c.fillStyle = SKINC;
                 c.beginPath(); c.arc(s * 17.9, -8.1, 4.9, 0, Math.PI * 2); c.fill(); c.stroke();
             }
             // 6) 셔츠 깃 + 초록 넥타이
@@ -1473,7 +1492,7 @@
             { id: 'president', name: '대통령 스킨', price: 70, desc: '특성: 로켓에 맞으면 아래로 52.3m 돌진! 끝나면 폭발과 함께 잠깐 무적' },
             { id: 'vip', name: 'DJ', price: 325, desc: '특성: 시작하자마자 할가스 발동 · 두부를 먹을 때마다 +2코인' },
             { id: 'mom', name: '아따맘마', price: 523, desc: '특성: 코알라를 먹으면 노따맘마로 변신(방어 2회) · 중력은 방패 회복 · 할가스 +1초' },
-            { id: 'mc', name: 'MC', price: 5230, desc: '직접 디자인한 스킨 · 딱! 하고 터져 나오는 화려한 부스터' }
+            { id: 'mc', name: 'MC', price: 5230, desc: '특성: 상하좌우로 이동 · 목숨 3개 · 딱! 하고 터져 나오는 화려한 부스터' }
         ];
         function saveShop() { lsSet('skyDiverCoins', String(coins)); lsSet('skyDiverOwned', JSON.stringify(ownedSkins)); lsSet('skyDiverSkin', currentSkin); }
         function updateCoinUI() {
@@ -1541,6 +1560,12 @@
         function openShop() { renderShop(); document.getElementById('shopScreen').classList.add('show'); if (!shopRunning) { shopRunning = true; requestAnimationFrame(shopFrame); } }
         function closeShop() { document.getElementById('shopScreen').classList.remove('show'); shopRunning = false; }
 
+        function updateLivesUI() {
+            const el = document.getElementById('hudLives'), pad = document.getElementById('vertPad'), isMc = currentSkin === 'mc';
+            if (el) { el.style.display = isMc ? 'block' : 'none'; if (isMc && player) { const n = Math.max(0, player.lives || 0); el.textContent = '❤️'.repeat(n) + '🖤'.repeat(Math.max(0, 3 - n)); } }
+            if (pad) pad.classList.toggle('show', isMc);
+        }
+
         let player = new Player();
         let clouds = Array.from({length:12}, ()=>new Cloud());
         let speedLines = Array.from({length:25}, ()=>new SpeedLine());
@@ -1554,6 +1579,7 @@
             document.getElementById('milestoneContainer').innerHTML='';
             player=new Player(); targetX=width/2;
             if (currentSkin==='vip') player.halgasTimer=320;
+            player.lives = (currentSkin==='mc') ? 3 : 1; targetY = height * 0.35; keyUp = false; keyDown = false; updateLivesUI();
             clouds.forEach(c=>c.reset(true));
             backgroundKoalas.forEach(bk=>bk.reset(true));
             owls.forEach(o=>o.reset(true));
@@ -1605,7 +1631,7 @@
                         else if (player.shield){ if (currentSkin==='mom' && (player.shieldHits||1) > 1) { player.shieldHits--; } else { player.shield=false; } createExplosion(obs.x,obs.y,'#10b981',25);sounds.playExplosion();obs.reset();}
                         else if (obs.type==='rocket'&&currentSkin==='president'){sounds.playHit();player.dashTarget=distance+52.3;createExplosion(obs.x,obs.y,'#f97316',25);floatTexts.push({x:player.x,y:player.y-40,t:'⬇ 돌진!',life:1});obs.reset();break;}
                         else if (obs.type==='rocket'){sounds.playHit();distance=Math.max(0,distance-52.3);player.hitRocketTimer=65;player.hitRocketX=obs.x;player.hitRocketY=player.y;createExplosion(obs.x,obs.y,'#f97316',25);obs.reset();break;}
-                        else{createExplosion(player.x,player.y,'#ef4444',35);sounds.playExplosion();gameOver();return;}
+                        else{createExplosion(player.x,player.y,'#ef4444',35);sounds.playExplosion(); if (currentSkin==='mc' && (player.lives||1) > 1) { player.lives--; player.postHalgasShieldTimer=100; obs.reset(); updateLivesUI(); floatTexts.push({x:player.x,y:player.y-40,t:'💔 목숨 -1',life:1}); break; } gameOver();return;}
                     }
                 }
             }
@@ -1715,8 +1741,8 @@
             else if (!sounds.enabled) sounds.stopBGM();
         });
 
-        window.addEventListener('keydown',(e)=>{if(e.key==='ArrowLeft'||e.key==='a')keyLeft=true;if(e.key==='ArrowRight'||e.key==='d')keyRight=true;});
-        window.addEventListener('keyup',(e)=>{if(e.key==='ArrowLeft'||e.key==='a')keyLeft=false;if(e.key==='ArrowRight'||e.key==='d')keyRight=false;});
+        window.addEventListener('keydown',(e)=>{if(e.key==='ArrowLeft'||e.key==='a')keyLeft=true;if(e.key==='ArrowRight'||e.key==='d')keyRight=true;if(e.key==='ArrowUp'||e.key==='w')keyUp=true;if(e.key==='ArrowDown'||e.key==='s')keyDown=true;});
+        window.addEventListener('keyup',(e)=>{if(e.key==='ArrowLeft'||e.key==='a')keyLeft=false;if(e.key==='ArrowRight'||e.key==='d')keyRight=false;if(e.key==='ArrowUp'||e.key==='w')keyUp=false;if(e.key==='ArrowDown'||e.key==='s')keyDown=false;});
 
         const vLeft=document.getElementById('virtualLeft');
         const vRight=document.getElementById('virtualRight');
@@ -1726,6 +1752,13 @@
         vRight.addEventListener('pointerdown',(e)=>{e.preventDefault();keyRight=true;});
         vRight.addEventListener('pointerup',(e)=>{e.preventDefault();keyRight=false;});
         vRight.addEventListener('pointerleave',(e)=>{e.preventDefault();keyRight=false;});
+        const vUp=document.getElementById('virtualUp'), vDown=document.getElementById('virtualDown');
+        vUp.addEventListener('pointerdown',(e)=>{e.preventDefault();keyUp=true;});
+        vUp.addEventListener('pointerup',(e)=>{e.preventDefault();keyUp=false;});
+        vUp.addEventListener('pointerleave',(e)=>{e.preventDefault();keyUp=false;});
+        vDown.addEventListener('pointerdown',(e)=>{e.preventDefault();keyDown=true;});
+        vDown.addEventListener('pointerup',(e)=>{e.preventDefault();keyDown=false;});
+        vDown.addEventListener('pointerleave',(e)=>{e.preventDefault();keyDown=false;});
 
         const pauseBtn=document.getElementById('pauseBtn');
         const pauseScreen=document.getElementById('pauseScreen');
@@ -1733,8 +1766,8 @@
         document.getElementById('resumeBtn').addEventListener('click',()=>{sounds.playClick();pauseScreen.classList.add('hidden');gameState=STATE.PLAYING;if(sounds.enabled)sounds.startBGM();});
         document.getElementById('quitBtn').addEventListener('click',()=>{sounds.playClick();pauseScreen.classList.add('hidden');document.getElementById('gameOverScreen').classList.add('hidden');document.getElementById('startScreen').classList.remove('hidden');gameState=STATE.MENU;sounds.stopBGM();});
 
-        window.addEventListener('pointermove',(e)=>{if(gameState===STATE.PLAYING&&player.hitRocketTimer<=0)targetX=e.clientX;});
-        window.addEventListener('touchmove',(e)=>{if(gameState===STATE.PLAYING&&e.touches.length>0&&player.hitRocketTimer<=0)targetX=e.touches[0].clientX;},{passive:true});
+        window.addEventListener('pointermove',(e)=>{if(gameState===STATE.PLAYING&&player.hitRocketTimer<=0){targetX=e.clientX;if(currentSkin==='mc')targetY=e.clientY-(e.pointerType==='touch'?70:0);}});
+        window.addEventListener('touchmove',(e)=>{if(gameState===STATE.PLAYING&&e.touches.length>0&&player.hitRocketTimer<=0){targetX=e.touches[0].clientX;if(currentSkin==='mc')targetY=e.touches[0].clientY-70;}},{passive:true});
 
         // ===================== 시작 메뉴 (애니메이션) =====================
         const menuEl = document.getElementById('startScreen');

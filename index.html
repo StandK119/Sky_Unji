@@ -277,7 +277,7 @@
                 <p>• 🪶 <b>중력:</b> 낙하 속도를 완화해주는 아이템</p>
                 <p>• 👵 <b>할가스:</b> 희귀 슈퍼 모드 (일반 2% / 하드 1%) · 3.25배 가속 &amp; 무적</p>
                 <p style="color:#be123c">• 🦉 <b>하드 모드:</b> 붉은 부엉이 하늘, 아이템이 훨씬 적게 나와요</p>
-                <p style="color:#b45309">• 👔 <b>스킨 특성:</b> 대통령 스킨은 로켓에 맞으면 아래로 돌진 후 폭발+무적, DJ는 시작 시 할가스 발동 + 두부 1개당 +2코인, 아따맘마는 코알라를 먹으면 노따맘마로 변신해 방어 2회 + 할가스 +1초, 중력은 노따맘마 방패 회복(방패가 없거나 가득이면 효과 없음), MC는 상하좌우로 움직일 수 있고 목숨이 3개</p>
+                <p style="color:#b45309">• 👔 <b>스킨 특성:</b> 대통령 스킨은 로켓에 맞으면 아래로 돌진 후 폭발+무적, DJ는 시작 시 할가스 발동 + 두부 1개당 +2코인, 아따맘마는 코알라를 먹으면 노따맘마로 변신해 방어 2회 + 할가스 +1초, 중력은 노따맘마 방패 회복(방패가 없거나 가득이면 효과 없음), MC는 상하좌우로 움직일 수 있고 목숨이 3개이며, 부활할 때 울트라 딱 부스터(7.4배 속도·2초 무적)가 확률로 발동</p>
                 <p style="color:#b45309">• 🪙 <b>코인:</b> 523m씩 내려갈 때마다 일반 4코인 / 하드 6코인! 상점에서 스킨을 살 수 있어요</p>
                 <p style="color:#4338ca">• 🎵 모드를 선택하면 <b>배경음악이 자동으로 재생</b>됩니다!</p>
                 <p style="text-align:center;margin-top:.7rem;opacity:.7">(아무 곳이나 누르면 닫혀요)</p>
@@ -876,7 +876,9 @@
                 ctx.translate(this.x, this.y);
                 const tilt = (targetX - this.x) * 0.02;
                 ctx.rotate(tilt + Math.sin(this.wobble * 0.5) * 0.05);
-                if (this.halgasTimer > 0) {
+                if (this.ultraTimer > 0) {
+                    drawMcSkin(ctx, this.wobble, true);
+                } else if (this.halgasTimer > 0) {
                     ctx.shadowColor = '#ec4899'; ctx.shadowBlur = 35;
                     ctx.beginPath(); ctx.arc(0, 4, this.radius+24+Math.sin(this.wobble*4)*4, 0, Math.PI*2);
                     ctx.strokeStyle = `hsl(${(this.wobble*120)%360}, 100%, 60%)`; ctx.lineWidth = 5; ctx.setLineDash([12,6]); ctx.stroke();
@@ -1418,9 +1420,44 @@
         // MC: 직접 디자인한 스킨 (스케치 구조 그대로 + 색만 입힘 / 얼굴은 올려주신 그림을 그대로 사용)
         const mcFaceImg = new Image();
         mcFaceImg.src = 'data:image/png;base64,' + document.getElementById('mcFaceData').textContent.trim();
-        function drawMcSkin(c, wobble) {
+        function drawMcSkin(c, wobble, ultra = false) {
             const tt = wobble / 9, OUT = '#111111', BLUE = '#3b6fe0', SKINC = '#fcd5b0';
             c.save(); c.lineJoin = 'round'; c.lineCap = 'round';
+            if (ultra) {
+                // 울트라 딱 부스터: 거대한 무지개 불기둥 + 충격 링 + 거대한 "딱" 폭풍
+                c.save(); c.translate(0, -28); c.scale(1, -1);
+                const big = c.createRadialGradient(0, 60, 6, 0, 60, 110);
+                big.addColorStop(0, 'rgba(255,255,255,0.95)'); big.addColorStop(0.3, 'rgba(250,204,21,0.6)'); big.addColorStop(0.65, 'rgba(236,72,153,0.32)'); big.addColorStop(1, 'rgba(99,102,241,0)');
+                c.fillStyle = big; c.beginPath(); c.arc(0, 60, 110, 0, Math.PI * 2); c.fill();
+                c.shadowColor = '#fde047'; c.shadowBlur = 30;
+                for (let i = 0; i < 13; i++) {
+                    const d = Math.abs(i - 6), bx = (i - 6) * 3.2, tx = (i - 6) * 10 + Math.sin(tt * 18 + i) * 8;
+                    const ty = 95 + (6 - d) * 11 + Math.sin(tt * 14 + i * 1.3) * 14, w = 9 - d * 0.6, hue = (tt * 320 + i * 28) % 360;
+                    const g = c.createLinearGradient(0, -3, 0, ty);
+                    g.addColorStop(0, 'rgba(255,255,255,0.98)'); g.addColorStop(0.25, 'hsla(' + hue + ',100%,62%,0.95)'); g.addColorStop(1, 'hsla(' + ((hue + 90) % 360) + ',100%,65%,0)');
+                    c.fillStyle = g; c.beginPath(); c.moveTo(bx - w, -3);
+                    c.quadraticCurveTo(bx - w * 0.3 + tx * 0.5, ty * 0.55, tx, ty);
+                    c.quadraticCurveTo(bx + w * 0.3 + tx * 0.5, ty * 0.55, bx + w, -3); c.closePath(); c.fill();
+                }
+                c.shadowBlur = 0;
+                const uc = 1 + Math.sin(wobble * 3) * 0.15;
+                c.fillStyle = '#fff7c2'; c.beginPath(); c.moveTo(-14 * uc, -3); c.quadraticCurveTo(0, 62 * uc, 14 * uc, -3); c.quadraticCurveTo(0, 10, -14 * uc, -3); c.fill();
+                c.fillStyle = '#ffffff'; c.beginPath(); c.moveTo(-7 * uc, -2); c.quadraticCurveTo(0, 36 * uc, 7 * uc, -2); c.fill();
+                for (let k = 0; k < 3; k++) {
+                    const ph = (tt * 2 + k / 3) % 1;
+                    c.strokeStyle = 'hsla(' + ((tt * 300 + k * 110) % 360) + ',100%,70%,' + ((1 - ph) * 0.8) + ')'; c.lineWidth = 3 * (1 - ph) + 0.8;
+                    c.beginPath(); c.ellipse(0, 10 + ph * 80, 14 + ph * 34, 5 + ph * 11, 0, 0, Math.PI * 2); c.stroke();
+                }
+                c.restore();
+                c.save(); c.textAlign = 'center'; c.textBaseline = 'middle';
+                for (let j = 0; j < 22; j++) {
+                    const ph = (tt * 1.8 + j * 0.0455) % 1, gx = Math.sin(j * 1.9 + tt * 5) * (6 + ph * 30), gy = -30 - ph * 100;
+                    c.globalAlpha = Math.min(1, (1 - ph) * 1.5); c.font = '900 ' + (10 + (j % 4) * 4) + "px 'Jua','Nunito',sans-serif";
+                    c.lineWidth = 2; c.strokeStyle = 'rgba(15,23,42,0.8)'; c.strokeText('딱', gx, gy);
+                    c.fillStyle = 'hsl(' + ((tt * 360 + j * 30) % 360) + ',100%,68%)'; c.fillText('딱', gx, gy);
+                }
+                c.restore();
+            }
             // 1) 위쪽 화려한 부스터
             c.save(); c.translate(0, -30); c.scale(1, -1);
             const au = c.createRadialGradient(0, 14, 3, 0, 14, 34);
@@ -1492,7 +1529,7 @@
             { id: 'president', name: '대통령 스킨', price: 70, desc: '특성: 로켓에 맞으면 아래로 52.3m 돌진! 끝나면 폭발과 함께 잠깐 무적' },
             { id: 'vip', name: 'DJ', price: 325, desc: '특성: 시작하자마자 할가스 발동 · 두부를 먹을 때마다 +2코인' },
             { id: 'mom', name: '아따맘마', price: 523, desc: '특성: 코알라를 먹으면 노따맘마로 변신(방어 2회) · 중력은 방패 회복 · 할가스 +1초' },
-            { id: 'mc', name: 'MC', price: 5230, desc: '특성: 상하좌우로 이동 · 목숨 3개 · 딱! 하고 터져 나오는 화려한 부스터' }
+            { id: 'mc', name: 'MC', price: 5230, desc: '특성: 상하좌우 이동 · 목숨 3개 · 부활 시 울트라 딱! 부스터(1회차 50%, 2회차 23%)' }
         ];
         function saveShop() { lsSet('skyDiverCoins', String(coins)); lsSet('skyDiverOwned', JSON.stringify(ownedSkins)); lsSet('skyDiverSkin', currentSkin); }
         function updateCoinUI() {
@@ -1560,6 +1597,15 @@
         function openShop() { renderShop(); document.getElementById('shopScreen').classList.add('show'); if (!shopRunning) { shopRunning = true; requestAnimationFrame(shopFrame); } }
         function closeShop() { document.getElementById('shopScreen').classList.remove('show'); shopRunning = false; }
 
+        // MC 부활 시 '울트라 딱! 부스터' 발동 확률: 첫 번째 부활 50%, 두 번째 부활 23%
+        function reviveRoll() {
+            const rv = 3 - player.lives, chance = (rv === 1 ? 0.5 : 0.23);
+            if (Math.random() < chance) {
+                player.ultraTimer = 120; player.postHalgasShieldTimer = 0;
+                floatTexts.push({ x: player.x, y: player.y - 105, t: '🔥 울트라 딱! 부스터!', life: 1 }); sounds.playPowerup();
+            }
+        }
+
         function updateLivesUI() {
             const el = document.getElementById('hudLives'), pad = document.getElementById('vertPad'), isMc = currentSkin === 'mc';
             if (el) { el.style.display = isMc ? 'block' : 'none'; if (isMc && player) { const n = Math.max(0, player.lives || 0); el.textContent = '❤️'.repeat(n) + '🖤'.repeat(Math.max(0, 3 - n)); } }
@@ -1592,12 +1638,20 @@
             if (gameState!==STATE.PLAYING) return;
             let speedMultiplier=1.0;
             if (player.hitRocketTimer>0) speedMultiplier=-3.5;
+            else if (player.ultraTimer>0) speedMultiplier=7.4;
             else if (player.dashTarget>0) speedMultiplier=3.5;
             else if (player.halgasTimer>0) speedMultiplier=3.25;
             else if (player.slowTimer>0) speedMultiplier=0.45;
             distance+=(baseSpeed*speedMultiplier)*0.08;
             if (distance<0) distance=0;
             checkMilestones(Math.floor(distance));
+            if (player.ultraTimer > 0) {
+                player.ultraTimer--;
+                if (player.ultraTimer === 0) {
+                    player.postHalgasShieldTimer = Math.round(60 * 1.7); triggerHalgasBlast(player.x, player.y);
+                    for (let k = 0; k < 4; k++) createExplosion(player.x + (Math.random() - 0.5) * 160, player.y + (Math.random() - 0.5) * 160, ['#facc15','#f43f5e','#38bdf8','#a855f7'][k], 28);
+                }
+            }
             if (player.dashTarget > 0 && distance >= player.dashTarget) {
                 player.dashTarget = 0; player.postHalgasShieldTimer = Math.round(60 * 1.7); triggerHalgasBlast(player.x, player.y);
             }
@@ -1611,18 +1665,19 @@
             const slowBadge=document.getElementById('slowBadge');
             const halgasBadge=document.getElementById('halgasBadge');
             let hasBuff=false;
-            if (player.halgasTimer>0){halgasBadge.classList.remove('hidden');hasBuff=true;}else halgasBadge.classList.add('hidden');
+            if (player.ultraTimer>0){halgasBadge.classList.remove('hidden');halgasBadge.textContent='🔥 울트라 딱! 부스터! (7.4배 속도 · 무적)';hasBuff=true;}else if (player.halgasTimer>0){halgasBadge.classList.remove('hidden');halgasBadge.textContent='👵 할가스 슈퍼 할머니 모드! (3.25x 하이퍼 가속 & 무적)';hasBuff=true;}else halgasBadge.classList.add('hidden');
             if (player.shield){shieldBadge.classList.remove('hidden');hasBuff=true;shieldBadge.textContent=currentSkin==='mom'?('🦸‍♀️ 노따맘마 변신! (방어 '+(player.shieldHits||1)+'회 남음)'):'🐨 정장 코알라 보호막 활성! (1회 방어)';}else shieldBadge.classList.add('hidden');
             if (player.slowTimer>0){slowBadge.classList.remove('hidden');hasBuff=true;}else slowBadge.classList.add('hidden');
             buffContainer.style.opacity=hasBuff?'1':'0';
             player.update();
+            if (player.ultraTimer > 0) for (let k = 0; k < 12; k++) player.flameParticles.push({ x: player.x + (Math.random() - 0.5) * 44, y: player.y - 30 - Math.random() * 30, vx: (Math.random() - 0.5) * 12, vy: -(Math.random() * 20 + 10), size: Math.random() * 12 + 8, color: ['#f43f5e','#f97316','#facc15','#22c55e','#38bdf8','#a855f7','#ffffff'][Math.floor(Math.random() * 7)], life: 1.0 });
             if (player.dashTarget > 0) for (let k = 0; k < 6; k++) player.flameParticles.push({ x: player.x + (Math.random() - 0.5) * 30, y: player.y - 10 - Math.random() * 10, vx: (Math.random() - 0.5) * 4, vy: -(Math.random() * 14 + 8), size: Math.random() * 8 + 5, color: ['#fde047', '#ffffff', '#fb923c'][Math.floor(Math.random() * 3)], life: 1.0 });
             clouds.forEach(c=>c.update(speedMultiplier));
             if (currentMode==='hard') owls.forEach(o=>o.update(speedMultiplier));
-            if (player.halgasTimer>0){speedLines.forEach(sl=>sl.update());backgroundKoalas.forEach(bk=>bk.update(speedMultiplier));}
+            if (player.halgasTimer>0||player.ultraTimer>0){speedLines.forEach(sl=>sl.update());backgroundKoalas.forEach(bk=>bk.update(speedMultiplier));}
             obstacles.forEach(o=>o.update(speedMultiplier));
             items.forEach(i=>i.update(speedMultiplier));
-            if (player.hitRocketTimer<=0&&player.postHalgasShieldTimer<=0&&!(player.dashTarget>0)) {
+            if (player.hitRocketTimer<=0&&player.postHalgasShieldTimer<=0&&!(player.dashTarget>0)&&!(player.ultraTimer>0)) {
                 for (let obs of obstacles) {
                     const dx=player.x-obs.x, dy=player.y-obs.y;
                     const dist=Math.sqrt(dx*dx+dy*dy);
@@ -1631,7 +1686,7 @@
                         else if (player.shield){ if (currentSkin==='mom' && (player.shieldHits||1) > 1) { player.shieldHits--; } else { player.shield=false; } createExplosion(obs.x,obs.y,'#10b981',25);sounds.playExplosion();obs.reset();}
                         else if (obs.type==='rocket'&&currentSkin==='president'){sounds.playHit();player.dashTarget=distance+52.3;createExplosion(obs.x,obs.y,'#f97316',25);floatTexts.push({x:player.x,y:player.y-40,t:'⬇ 돌진!',life:1});obs.reset();break;}
                         else if (obs.type==='rocket'){sounds.playHit();distance=Math.max(0,distance-52.3);player.hitRocketTimer=65;player.hitRocketX=obs.x;player.hitRocketY=player.y;createExplosion(obs.x,obs.y,'#f97316',25);obs.reset();break;}
-                        else{createExplosion(player.x,player.y,'#ef4444',35);sounds.playExplosion(); if (currentSkin==='mc' && (player.lives||1) > 1) { player.lives--; player.postHalgasShieldTimer=100; obs.reset(); updateLivesUI(); floatTexts.push({x:player.x,y:player.y-40,t:'💔 목숨 -1',life:1}); break; } gameOver();return;}
+                        else{createExplosion(player.x,player.y,'#ef4444',35);sounds.playExplosion(); if (currentSkin==='mc' && (player.lives||1) > 1) { player.lives--; player.postHalgasShieldTimer=100; reviveRoll(); obs.reset(); updateLivesUI(); floatTexts.push({x:player.x,y:player.y-40,t:'💔 목숨 -1',life:1}); break; } gameOver();return;}
                     }
                 }
             }
@@ -1675,7 +1730,7 @@
 
         function render() {
             ctx.clearRect(0,0,width,height);
-            if (player.halgasTimer>0) {
+            if (player.halgasTimer>0||player.ultraTimer>0) {
                 const bgGrad=ctx.createLinearGradient(0,0,0,height);
                 bgGrad.addColorStop(0,'#020617'); bgGrad.addColorStop(0.5,'#0f172a'); bgGrad.addColorStop(1,'#1e1b4b');
                 ctx.fillStyle=bgGrad; ctx.fillRect(0,0,width,height);
